@@ -445,6 +445,1449 @@ def registrar_factura():
         print(f"\n  Error al registrar factura: {e}")
 
 
+# ===================== FUNCIONES DE EDICIÓN =====================
+
+
+def editar_cliente():
+    titulo("EDITAR CLIENTE")
+
+    cedula = _input_no_vacio("  Cédula del cliente a editar: ")
+
+    try:
+        resp = supabase.table("cliente").select("*").eq("cedula", cedula).execute()
+        if not resp.data:
+            print(f"\n  No existe un cliente con cédula {cedula}.")
+            return
+    except Exception as e:
+        print(f"\n  Error al buscar cliente: {e}")
+        return
+
+    cliente = resp.data[0]
+    print(f"\n  Datos actuales:")
+    print(f"  Nombre: {cliente.get('nombre', '')}")
+    print(f"  Dirección: {cliente.get('direccion', '')}")
+    print(f"  Teléfono: {cliente.get('telefono', '')}")
+    print(f"  Correo: {cliente.get('correo', '')}")
+
+    print("\n  Deje en blanco para mantener el valor actual:\n")
+    nombre = input(f"  Nombre [{cliente.get('nombre', '')}]: ").strip()
+    direccion = input(f"  Dirección [{cliente.get('direccion', '')}]: ").strip()
+    telefono = input(f"  Teléfono [{cliente.get('telefono', '')}]: ").strip()
+    correo = input(f"  Correo [{cliente.get('correo', '')}]: ").strip()
+
+    datos = {}
+    if nombre:
+        datos["nombre"] = nombre
+    if direccion:
+        datos["direccion"] = direccion
+    if telefono:
+        datos["telefono"] = telefono
+    if correo:
+        datos["correo"] = correo
+
+    if not datos:
+        print("\n  No se realizaron cambios.")
+        return
+
+    try:
+        supabase.table("cliente").update(datos).eq("cedula", cedula).execute()
+        print(f"\n  Cliente {cedula} actualizado exitosamente.")
+    except Exception as e:
+        print(f"\n  Error al actualizar cliente: {e}")
+
+
+def editar_mascota():
+    titulo("EDITAR MASCOTA")
+
+    print("\n  --- Mascotas disponibles ---")
+    id_mascota = _seleccionar_registro("mascota", ["idmascota", "nombre", "especie"], "ID de la mascota: ")
+    if id_mascota is None:
+        return
+
+    try:
+        resp = supabase.table("mascota").select("*").eq("idmascota", id_mascota).execute()
+        if not resp.data:
+            print(f"\n  No existe una mascota con ID {id_mascota}.")
+            return
+    except Exception as e:
+        print(f"\n  Error al buscar mascota: {e}")
+        return
+
+    mascota = resp.data[0]
+    print(f"\n  Datos actuales:")
+    print(f"  Nombre: {mascota.get('nombre', '')}")
+    print(f"  Sexo: {mascota.get('sexo', '')}")
+    print(f"  Edad: {mascota.get('edad', '')}")
+    print(f"  Especie: {mascota.get('especie', '')}")
+    print(f"  Raza: {mascota.get('raza', '')}")
+
+    print("\n  Deje en blanco para mantener el valor actual:\n")
+    nombre = input(f"  Nombre [{mascota.get('nombre', '')}]: ").strip()
+    sexo = input(f"  Sexo [{mascota.get('sexo', '')}]: ").strip().upper()
+    edad = input(f"  Edad [{mascota.get('edad', '')}]: ").strip()
+    especie = input(f"  Especie [{mascota.get('especie', '')}]: ").strip()
+    raza = input(f"  Raza [{mascota.get('raza', '')}]: ").strip()
+
+    datos = {}
+    if nombre:
+        datos["nombre"] = nombre
+    if sexo and sexo in ("M", "F"):
+        datos["sexo"] = sexo
+    if edad:
+        try:
+            datos["edad"] = int(edad)
+        except ValueError:
+            print("  Edad inválida, se mantendrá la anterior.")
+    if especie:
+        datos["especie"] = especie
+    if raza:
+        datos["raza"] = raza
+
+    if not datos:
+        print("\n  No se realizaron cambios.")
+        return
+
+    try:
+        supabase.table("mascota").update(datos).eq("idmascota", id_mascota).execute()
+        print(f"\n  Mascota {id_mascota} actualizada exitosamente.")
+    except Exception as e:
+        print(f"\n  Error al actualizar mascota: {e}")
+
+
+def editar_producto():
+    titulo("EDITAR PRODUCTO / SERVICIO")
+
+    codigo = _input_no_vacio("  Código del producto a editar: ")
+
+    try:
+        resp = supabase.table("producto_servicio").select("*").eq("codigo_producto_servicio", codigo).execute()
+        if not resp.data:
+            print(f"\n  No existe un producto con código {codigo}.")
+            return
+    except Exception as e:
+        print(f"\n  Error al buscar producto: {e}")
+        return
+
+    prod = resp.data[0]
+    print(f"\n  Datos actuales:")
+    print(f"  Descripción: {prod.get('descripcion', '')}")
+    print(f"  Precio: ${prod.get('precio', 0)}")
+    print(f"  Tipo IVA: {prod.get('tipo_iva', '')}%")
+    print(f"  Tipo: {prod.get('tipo', '')}")
+
+    print("\n  Deje en blanco para mantener el valor actual:\n")
+    descripcion = input(f"  Descripción [{prod.get('descripcion', '')}]: ").strip()
+    precio = input(f"  Precio [{prod.get('precio', 0)}]: ").strip()
+    tipo_iva = input(f"  Tipo IVA [{prod.get('tipo_iva', '')}]: ").strip()
+
+    datos = {}
+    if descripcion:
+        datos["descripcion"] = descripcion
+    if precio:
+        try:
+            datos["precio"] = float(precio)
+        except ValueError:
+            print("  Precio inválido, se mantendrá el anterior.")
+    if tipo_iva:
+        try:
+            datos["tipo_iva"] = float(tipo_iva)
+        except ValueError:
+            print("  IVA inválido, se mantendrá el anterior.")
+
+    if not datos:
+        print("\n  No se realizaron cambios.")
+        return
+
+    try:
+        supabase.table("producto_servicio").update(datos).eq("codigo_producto_servicio", codigo).execute()
+        print(f"\n  Producto {codigo} actualizado exitosamente.")
+    except Exception as e:
+        print(f"\n  Error al actualizar producto: {e}")
+
+
+def editar_cita():
+    titulo("EDITAR CITA")
+
+    print("\n  --- Citas disponibles ---")
+    try:
+        resp = supabase.table("cita").select("*").execute()
+        citas = resp.data
+    except Exception as e:
+        print(f"  Error al cargar citas: {e}")
+        return
+
+    if not citas:
+        print("  No hay citas registradas.")
+        return
+
+    for c in citas:
+        print(f"  ID: {c['idcita']}  |  Mascota: {c.get('idmascota', '')}  |  Servicio: {c.get('codigo_producto_servicio', '')}  |  Estado: {c.get('estado', '')}")
+
+    id_cita = _input_numero("\n  ID de la cita a editar: ")
+
+    try:
+        resp = supabase.table("cita").select("*").eq("idcita", id_cita).execute()
+        if not resp.data:
+            print(f"\n  No existe una cita con ID {id_cita}.")
+            return
+    except Exception as e:
+        print(f"\n  Error al buscar cita: {e}")
+        return
+
+    cita = resp.data[0]
+    print(f"\n  Datos actuales:")
+    print(f"  Mascota: {cita.get('idmascota', '')}")
+    print(f"  Servicio: {cita.get('codigo_producto_servicio', '')}")
+    print(f"  Estado: {cita.get('estado', '')}")
+
+    print("\n  Deje en blanco para mantener el valor actual:\n")
+    print(f"  Estado actual: {cita.get('estado', '')}")
+    print("  Opciones: Programada, En progreso, Finalizada, Cancelada")
+    estado = input("  Nuevo estado: ").strip().capitalize()
+
+    datos = {}
+    if estado and estado in ("Programada", "En progreso", "Finalizada", "Cancelada"):
+        datos["estado"] = estado
+    elif estado:
+        print("  Estado inválido, se mantendrá el anterior.")
+
+    if not datos:
+        print("\n  No se realizaron cambios.")
+        return
+
+    try:
+        supabase.table("cita").update(datos).eq("idcita", id_cita).execute()
+        print(f"\n  Cita {id_cita} actualizada exitosamente.")
+    except Exception as e:
+        print(f"\n  Error al actualizar cita: {e}")
+
+
+def editar_consulta():
+    titulo("EDITAR CONSULTA CLÍNICA")
+
+    print("\n  --- Consultas disponibles ---")
+    try:
+        resp = supabase.table("consulta").select("*").execute()
+        consultas = resp.data
+    except Exception as e:
+        print(f"  Error al cargar consultas: {e}")
+        return
+
+    if not consultas:
+        print("  No hay consultas registradas.")
+        return
+
+    for c in consultas:
+        print(f"  ID: {c['id_consulta']}  |  Mascota: {c.get('idmascota', '')}  |  Diagnóstico: {c.get('diagnostico', '')[:30]}")
+
+    id_consulta = _input_numero("\n  ID de la consulta a editar: ")
+
+    try:
+        resp = supabase.table("consulta").select("*").eq("id_consulta", id_consulta).execute()
+        if not resp.data:
+            print(f"\n  No existe una consulta con ID {id_consulta}.")
+            return
+    except Exception as e:
+        print(f"\n  Error al buscar consulta: {e}")
+        return
+
+    consulta = resp.data[0]
+    print(f"\n  Datos actuales:")
+    print(f"  Diagnóstico: {consulta.get('diagnostico', '')}")
+    print(f"  Tratamiento: {consulta.get('tratamiento_clinico', '')}")
+
+    print("\n  Deje en blanco para mantener el valor actual:\n")
+    diagnostico = input(f"  Diagnóstico [{consulta.get('diagnostico', '')}]: ").strip()
+    tratamiento = input(f"  Tratamiento [{consulta.get('tratamiento_clinico', '')}]: ").strip()
+
+    datos = {}
+    if diagnostico:
+        datos["diagnostico"] = diagnostico
+    if tratamiento:
+        datos["tratamiento_clinico"] = tratamiento
+
+    if not datos:
+        print("\n  No se realizaron cambios.")
+        return
+
+    try:
+        supabase.table("consulta").update(datos).eq("id_consulta", id_consulta).execute()
+        print(f"\n  Consulta {id_consulta} actualizada exitosamente.")
+    except Exception as e:
+        print(f"\n  Error al actualizar consulta: {e}")
+
+
+# ===================== FUNCIONES DE ELIMINACIÓN =====================
+
+
+def eliminar_cliente():
+    titulo("ELIMINAR CLIENTE")
+
+    cedula = _input_no_vacio("  Cédula del cliente a eliminar: ")
+
+    try:
+        resp = supabase.table("cliente").select("*").eq("cedula", cedula).execute()
+        if not resp.data:
+            print(f"\n  No existe un cliente con cédula {cedula}.")
+            return
+    except Exception as e:
+        print(f"\n  Error al buscar cliente: {e}")
+        return
+
+    cliente = resp.data[0]
+    print(f"\n  Cliente a eliminar:")
+    print(f"  Cédula: {cliente.get('cedula', '')}")
+    print(f"  Nombre: {cliente.get('nombre', '')}")
+    print(f"  Teléfono: {cliente.get('telefono', '')}")
+
+    confirmar = input("\n  ¿Está seguro de eliminar este cliente? (s/n): ").strip().lower()
+    if confirmar != "s":
+        print("  Eliminación cancelada.")
+        return
+
+    try:
+        supabase.table("cliente").delete().eq("cedula", cedula).execute()
+        print(f"\n  Cliente {cedula} eliminado exitosamente.")
+    except Exception as e:
+        print(f"\n  Error al eliminar cliente: {e}")
+
+
+def eliminar_mascota():
+    titulo("ELIMINAR MASCOTA")
+
+    print("\n  --- Mascotas disponibles ---")
+    id_mascota = _seleccionar_registro("mascota", ["idmascota", "nombre", "especie"], "ID de la mascota: ")
+    if id_mascota is None:
+        return
+
+    try:
+        resp = supabase.table("mascota").select("*").eq("idmascota", id_mascota).execute()
+        if not resp.data:
+            print(f"\n  No existe una mascota con ID {id_mascota}.")
+            return
+    except Exception as e:
+        print(f"\n  Error al buscar mascota: {e}")
+        return
+
+    mascota = resp.data[0]
+    print(f"\n  Mascota a eliminar:")
+    print(f"  ID: {mascota.get('idmascota', '')}")
+    print(f"  Nombre: {mascota.get('nombre', '')}")
+    print(f"  Especie: {mascota.get('especie', '')}")
+    print(f"  Raza: {mascota.get('raza', '')}")
+
+    confirmar = input("\n  ¿Está seguro de eliminar esta mascota? (s/n): ").strip().lower()
+    if confirmar != "s":
+        print("  Eliminación cancelada.")
+        return
+
+    try:
+        supabase.table("mascota").delete().eq("idmascota", id_mascota).execute()
+        print(f"\n  Mascota {id_mascota} eliminada exitosamente.")
+    except Exception as e:
+        print(f"\n  Error al eliminar mascota: {e}")
+
+
+def eliminar_producto():
+    titulo("ELIMINAR PRODUCTO / SERVICIO")
+
+    codigo = _input_no_vacio("  Código del producto a eliminar: ")
+
+    try:
+        resp = supabase.table("producto_servicio").select("*").eq("codigo_producto_servicio", codigo).execute()
+        if not resp.data:
+            print(f"\n  No existe un producto con código {codigo}.")
+            return
+    except Exception as e:
+        print(f"\n  Error al buscar producto: {e}")
+        return
+
+    prod = resp.data[0]
+    print(f"\n  Producto a eliminar:")
+    print(f"  Código: {prod.get('codigo_producto_servicio', '')}")
+    print(f"  Descripción: {prod.get('descripcion', '')}")
+    print(f"  Tipo: {prod.get('tipo', '')}")
+    print(f"  Precio: ${prod.get('precio', 0)}")
+
+    confirmar = input("\n  ¿Está seguro de eliminar este producto? (s/n): ").strip().lower()
+    if confirmar != "s":
+        print("  Eliminación cancelada.")
+        return
+
+    try:
+        supabase.table("producto_servicio").delete().eq("codigo_producto_servicio", codigo).execute()
+        print(f"\n  Producto {codigo} eliminado exitosamente.")
+    except Exception as e:
+        print(f"\n  Error al eliminar producto: {e}")
+
+
+def eliminar_cita():
+    titulo("ELIMINAR CITA")
+
+    print("\n  --- Citas disponibles ---")
+    try:
+        resp = supabase.table("cita").select("*").execute()
+        citas = resp.data
+    except Exception as e:
+        print(f"  Error al cargar citas: {e}")
+        return
+
+    if not citas:
+        print("  No hay citas registradas.")
+        return
+
+    for c in citas:
+        print(f"  ID: {c['idcita']}  |  Mascota: {c.get('idmascota', '')}  |  Servicio: {c.get('codigo_producto_servicio', '')}  |  Estado: {c.get('estado', '')}")
+
+    id_cita = _input_numero("\n  ID de la cita a eliminar: ")
+
+    try:
+        resp = supabase.table("cita").select("*").eq("idcita", id_cita).execute()
+        if not resp.data:
+            print(f"\n  No existe una cita con ID {id_cita}.")
+            return
+    except Exception as e:
+        print(f"\n  Error al buscar cita: {e}")
+        return
+
+    cita = resp.data[0]
+    print(f"\n  Cita a eliminar:")
+    print(f"  ID: {cita.get('idcita', '')}")
+    print(f"  Mascota: {cita.get('idmascota', '')}")
+    print(f"  Servicio: {cita.get('codigo_producto_servicio', '')}")
+    print(f"  Estado: {cita.get('estado', '')}")
+
+    confirmar = input("\n  ¿Está seguro de eliminar esta cita? (s/n): ").strip().lower()
+    if confirmar != "s":
+        print("  Eliminación cancelada.")
+        return
+
+    try:
+        supabase.table("cita").delete().eq("idcita", id_cita).execute()
+        print(f"\n  Cita {id_cita} eliminada exitosamente.")
+    except Exception as e:
+        print(f"\n  Error al eliminar cita: {e}")
+
+
+def eliminar_consulta():
+    titulo("ELIMINAR CONSULTA CLÍNICA")
+
+    print("\n  --- Consultas disponibles ---")
+    try:
+        resp = supabase.table("consulta").select("*").execute()
+        consultas = resp.data
+    except Exception as e:
+        print(f"  Error al cargar consultas: {e}")
+        return
+
+    if not consultas:
+        print("  No hay consultas registradas.")
+        return
+
+    for c in consultas:
+        print(f"  ID: {c['id_consulta']}  |  Mascota: {c.get('idmascota', '')}  |  Diagnóstico: {c.get('diagnostico', '')[:30]}")
+
+    id_consulta = _input_numero("\n  ID de la consulta a eliminar: ")
+
+    try:
+        resp = supabase.table("consulta").select("*").eq("id_consulta", id_consulta).execute()
+        if not resp.data:
+            print(f"\n  No existe una consulta con ID {id_consulta}.")
+            return
+    except Exception as e:
+        print(f"\n  Error al buscar consulta: {e}")
+        return
+
+    consulta = resp.data[0]
+    print(f"\n  Consulta a eliminar:")
+    print(f"  ID: {consulta.get('id_consulta', '')}")
+    print(f"  Mascota: {consulta.get('idmascota', '')}")
+    print(f"  Diagnóstico: {consulta.get('diagnostico', '')}")
+
+    confirmar = input("\n  ¿Está seguro de eliminar esta consulta? (s/n): ").strip().lower()
+    if confirmar != "s":
+        print("  Eliminación cancelada.")
+        return
+
+    try:
+        supabase.table("consulta").delete().eq("id_consulta", id_consulta).execute()
+        print(f"\n  Consulta {id_consulta} eliminada exitosamente.")
+    except Exception as e:
+        print(f"\n  Error al eliminar consulta: {e}")
+
+
+# ===================== CRUD TABLAS DE RELACIÓN =====================
+
+
+# ---------- FACTURA_DETALLE ----------
+
+
+def agregar_detalle_factura():
+    titulo("AGREGAR DETALLE A FACTURA")
+
+    try:
+        resp = supabase.table("factura").select("*").execute()
+        if not resp.data:
+            print("  No hay facturas registradas.")
+            return
+        print("\n  --- Facturas disponibles ---")
+        for f in resp.data:
+            print(f"  N° {f['num_comprobante']}  |  Cliente: {f.get('cedula', '')}  |  Estado: {f.get('estado_pago', '')}")
+    except Exception as e:
+        print(f"  Error al cargar facturas: {e}")
+        return
+
+    num_comp = _input_numero("  N° de comprobante: ")
+
+    try:
+        resp = supabase.table("factura").select("*").eq("num_comprobante", num_comp).execute()
+        if not resp.data:
+            print(f"\n  No existe factura con N° {num_comp}.")
+            return
+    except Exception as e:
+        print(f"\n  Error al buscar factura: {e}")
+        return
+
+    print("\n  --- Productos/Servicios disponibles ---")
+    try:
+        resp_prod = supabase.table("producto_servicio").select("*").execute()
+        for p in resp_prod.data:
+            print(f"  {p['codigo_producto_servicio']}  |  {p.get('descripcion', '')}  |  ${p.get('precio', 0)}")
+    except Exception as e:
+        print(f"  Error al cargar productos: {e}")
+        return
+
+    cod = _input_no_vacio("  Código del producto: ")
+
+    try:
+        resp_p = supabase.table("producto_servicio").select("*").eq("codigo_producto_servicio", cod).execute()
+        if not resp_p.data:
+            print(f"\n  No existe producto con código {cod}.")
+            return
+    except Exception as e:
+        print(f"\n  Error al verificar producto: {e}")
+        return
+
+    prod = resp_p.data[0]
+    print(f"  -> {prod['descripcion']} (${prod.get('precio', 0)})")
+
+    cantidad = _input_numero("  Cantidad: ")
+    precio_unitario = float(prod.get("precio", 0))
+    subtotal = round(precio_unitario * cantidad, 2)
+
+    detalle = {
+        "num_comprobante": num_comp,
+        "codigo_producto_servicio": cod,
+        "cantidad": cantidad,
+        "precio_unitario": precio_unitario,
+        "subtotal": subtotal,
+    }
+
+    try:
+        supabase.table("factura_detalle").insert(detalle).execute()
+        print(f"\n  Detalle agregado: {cantidad} x ${precio_unitario} = ${subtotal}")
+    except Exception as e:
+        print(f"\n  Error al agregar detalle: {e}")
+
+
+def editar_detalle_factura():
+    titulo("EDITAR DETALLE DE FACTURA")
+
+    num_comp = _input_numero("  N° de comprobante: ")
+
+    try:
+        resp = supabase.table("factura_detalle").select("*").eq("num_comprobante", num_comp).execute()
+        if not resp.data:
+            print(f"\n  No hay detalles para la factura {num_comp}.")
+            return
+        print(f"\n  --- Detalles de factura {num_comp} ---")
+        for d in resp.data:
+            print(f"  Producto: {d.get('codigo_producto_servicio', '')}  |  Cant: {d.get('cantidad', 0)}  |  Subtotal: ${d.get('subtotal', 0)}")
+    except Exception as e:
+        print(f"\n  Error al cargar detalles: {e}")
+        return
+
+    cod = _input_no_vacio("  Código del producto a editar: ")
+
+    try:
+        resp = supabase.table("factura_detalle").select("*").eq("num_comprobante", num_comp).eq("codigo_producto_servicio", cod).execute()
+        if not resp.data:
+            print(f"\n  No existe detalle para producto {cod} en factura {num_comp}.")
+            return
+    except Exception as e:
+        print(f"\n  Error al buscar detalle: {e}")
+        return
+
+    det = resp.data[0]
+    print(f"\n  Datos actuales:")
+    print(f"  Cantidad: {det.get('cantidad', 0)}")
+    print(f"  Precio unitario: ${det.get('precio_unitario', 0)}")
+
+    cantidad = input(f"\n  Nueva cantidad [{det.get('cantidad', 0)}]: ").strip()
+    precio = input(f"  Nuevo precio unitario [{det.get('precio_unitario', 0)}]: ").strip()
+
+    datos = {}
+    if cantidad:
+        try:
+            datos["cantidad"] = int(cantidad)
+        except ValueError:
+            print("  Cantidad inválida.")
+    if precio:
+        try:
+            datos["precio_unitario"] = float(precio)
+        except ValueError:
+            print("  Precio inválido.")
+
+    if "cantidad" in datos or "precio_unitario" in datos:
+        cant = datos.get("cantidad", det.get("cantidad", 0))
+        prec = datos.get("precio_unitario", det.get("precio_unitario", 0))
+        datos["subtotal"] = round(cant * prec, 2)
+
+    if not datos:
+        print("\n  No se realizaron cambios.")
+        return
+
+    try:
+        supabase.table("factura_detalle").update(datos).eq("num_comprobante", num_comp).eq("codigo_producto_servicio", cod).execute()
+        print(f"\n  Detalle actualizado exitosamente.")
+    except Exception as e:
+        print(f"\n  Error al actualizar detalle: {e}")
+
+
+def eliminar_detalle_factura():
+    titulo("ELIMINAR DETALLE DE FACTURA")
+
+    num_comp = _input_numero("  N° de comprobante: ")
+
+    try:
+        resp = supabase.table("factura_detalle").select("*").eq("num_comprobante", num_comp).execute()
+        if not resp.data:
+            print(f"\n  No hay detalles para la factura {num_comp}.")
+            return
+        print(f"\n  --- Detalles de factura {num_comp} ---")
+        for d in resp.data:
+            print(f"  Producto: {d.get('codigo_producto_servicio', '')}  |  Cant: {d.get('cantidad', 0)}  |  Subtotal: ${d.get('subtotal', 0)}")
+    except Exception as e:
+        print(f"\n  Error al cargar detalles: {e}")
+        return
+
+    cod = _input_no_vacio("  Código del producto a eliminar: ")
+
+    confirmar = input(f"\n  ¿Eliminar detalle {cod} de factura {num_comp}? (s/n): ").strip().lower()
+    if confirmar != "s":
+        print("  Eliminación cancelada.")
+        return
+
+    try:
+        supabase.table("factura_detalle").delete().eq("num_comprobante", num_comp).eq("codigo_producto_servicio", cod).execute()
+        print(f"\n  Detalle eliminado exitosamente.")
+    except Exception as e:
+        print(f"\n  Error al eliminar detalle: {e}")
+
+
+# ---------- RECETA ----------
+
+
+def agregar_receta():
+    titulo("AGREGAR RECETA")
+
+    print("\n  --- Consultas disponibles ---")
+    try:
+        resp = supabase.table("consulta").select("*").execute()
+        if not resp.data:
+            print("  No hay consultas registradas.")
+            return
+        for c in resp.data:
+            print(f"  ID: {c['id_consulta']}  |  Mascota: {c.get('idmascota', '')}  |  Diagnóstico: {c.get('diagnostico', '')[:30]}")
+    except Exception as e:
+        print(f"  Error al cargar consultas: {e}")
+        return
+
+    id_consulta = _input_numero("  ID de la consulta: ")
+
+    try:
+        resp = supabase.table("consulta").select("*").eq("id_consulta", id_consulta).execute()
+        if not resp.data:
+            print(f"\n  No existe consulta con ID {id_consulta}.")
+            return
+    except Exception as e:
+        print(f"\n  Error al buscar consulta: {e}")
+        return
+
+    try:
+        resp_rec = supabase.table("receta").select("*").eq("id_consulta", id_consulta).execute()
+        if resp_rec.data:
+            print(f"\n  Esta consulta ya tiene una receta (ID: {resp_rec.data[0].get('id_receta', '')}).")
+            return
+    except Exception:
+        pass
+
+    indicaciones = _input_no_vacio("  Indicaciones en casa: ")
+
+    try:
+        resp_max = supabase.table("receta").select("id_receta").order("id_receta", desc=True).execute()
+        max_id = resp_max.data[0]["id_receta"] if resp_max.data else 0
+        nuevo_id = max_id + 1
+    except Exception as e:
+        print(f"\n  Error al obtener ID: {e}")
+        return
+
+    receta = {
+        "id_receta": nuevo_id,
+        "indicaciones_en_casa": indicaciones,
+        "id_consulta": id_consulta,
+    }
+
+    try:
+        supabase.table("receta").insert(receta).execute()
+        print(f"\n  Receta {nuevo_id} registrada para consulta {id_consulta}.")
+    except Exception as e:
+        print(f"\n  Error al registrar receta: {e}")
+
+
+def editar_receta():
+    titulo("EDITAR RECETA")
+
+    print("\n  --- Recetas disponibles ---")
+    try:
+        resp = supabase.table("receta").select("*").execute()
+        if not resp.data:
+            print("  No hay recetas registradas.")
+            return
+        for r in resp.data:
+            print(f"  ID: {r['id_receta']}  |  Consulta: {r.get('id_consulta', '')}  |  Indicaciones: {r.get('indicaciones_en_casa', '')[:40]}")
+    except Exception as e:
+        print(f"  Error al cargar recetas: {e}")
+        return
+
+    id_receta = _input_numero("  ID de la receta a editar: ")
+
+    try:
+        resp = supabase.table("receta").select("*").eq("id_receta", id_receta).execute()
+        if not resp.data:
+            print(f"\n  No existe receta con ID {id_receta}.")
+            return
+    except Exception as e:
+        print(f"\n  Error al buscar receta: {e}")
+        return
+
+    receta = resp.data[0]
+    print(f"\n  Indicaciones actuales: {receta.get('indicaciones_en_casa', '')}")
+
+    nuevas_ind = input("\n  Nuevas indicaciones (deje en blanco para mantener): ").strip()
+
+    if not nuevas_ind:
+        print("\n  No se realizaron cambios.")
+        return
+
+    try:
+        supabase.table("receta").update({"indicaciones_en_casa": nuevas_ind}).eq("id_receta", id_receta).execute()
+        print(f"\n  Receta {id_receta} actualizada exitosamente.")
+    except Exception as e:
+        print(f"\n  Error al actualizar receta: {e}")
+
+
+def eliminar_receta():
+    titulo("ELIMINAR RECETA")
+
+    print("\n  --- Recetas disponibles ---")
+    try:
+        resp = supabase.table("receta").select("*").execute()
+        if not resp.data:
+            print("  No hay recetas registradas.")
+            return
+        for r in resp.data:
+            print(f"  ID: {r['id_receta']}  |  Consulta: {r.get('id_consulta', '')}  |  Indicaciones: {r.get('indicaciones_en_casa', '')[:40]}")
+    except Exception as e:
+        print(f"  Error al cargar recetas: {e}")
+        return
+
+    id_receta = _input_numero("  ID de la receta a eliminar: ")
+
+    confirmar = input(f"\n  ¿Eliminar receta {id_receta}? (s/n): ").strip().lower()
+    if confirmar != "s":
+        print("  Eliminación cancelada.")
+        return
+
+    try:
+        supabase.table("receta").delete().eq("id_receta", id_receta).execute()
+        print(f"\n  Receta {id_receta} eliminada exitosamente.")
+    except Exception as e:
+        print(f"\n  Error al eliminar receta: {e}")
+
+
+# ---------- ATENCIÓN ESTÉTICA ----------
+
+
+def agregar_atencion_estetica():
+    titulo("AGREGAR ATENCIÓN ESTÉTICA")
+
+    print("\n  --- Mascotas disponibles ---")
+    try:
+        resp = supabase.table("mascota").select("*").execute()
+        for m in resp.data:
+            print(f"  ID: {m['idmascota']}  |  {m.get('nombre', '')}  |  {m.get('especie', '')}  |  {m.get('raza', '')}")
+    except Exception as e:
+        print(f"  Error al cargar mascotas: {e}")
+        return
+
+    id_mascota = _input_numero("  ID de la mascota: ")
+
+    try:
+        resp = supabase.table("mascota").select("*").eq("idmascota", id_mascota).execute()
+        if not resp.data:
+            print(f"\n  No existe mascota con ID {id_mascota}.")
+            return
+    except Exception as e:
+        print(f"\n  Error al verificar mascota: {e}")
+        return
+
+    hora_inicio = _input_no_vacio("  Hora de inicio (HH:MM): ")
+    hora_fin = _input_no_vacio("  Hora de fin (HH:MM): ")
+    observaciones = input("  Observaciones: ").strip()
+
+    try:
+        resp_max = supabase.table("atencion_estetica").select("id_peluqueria").order("id_peluqueria", desc=True).execute()
+        max_id = resp_max.data[0]["id_peluqueria"] if resp_max.data else 0
+        nuevo_id = max_id + 1
+    except Exception as e:
+        print(f"\n  Error al obtener ID: {e}")
+        return
+
+    atencion = {
+        "id_peluqueria": nuevo_id,
+        "hora_inicio": hora_inicio,
+        "hora_fin": hora_fin,
+        "observaciones": observaciones or None,
+        "idmascota": id_mascota,
+    }
+
+    try:
+        supabase.table("atencion_estetica").insert(atencion).execute()
+        print(f"\n  Atención estética {nuevo_id} registrada para mascota {id_mascota}.")
+    except Exception as e:
+        print(f"\n  Error al registrar atención: {e}")
+
+
+def editar_atencion_estetica():
+    titulo("EDITAR ATENCIÓN ESTÉTICA")
+
+    try:
+        resp = supabase.table("atencion_estetica").select("*").execute()
+        if not resp.data:
+            print("  No hay atenciones estéticas registradas.")
+            return
+        for a in resp.data:
+            print(f"  ID: {a['id_peluqueria']}  |  Mascota: {a.get('idmascota', '')}  |  Inicio: {a.get('hora_inicio', '')}  |  Fin: {a.get('hora_fin', '')}")
+    except Exception as e:
+        print(f"  Error al cargar atenciones: {e}")
+        return
+
+    id_atencion = _input_numero("  ID de la atención a editar: ")
+
+    try:
+        resp = supabase.table("atencion_estetica").select("*").eq("id_peluqueria", id_atencion).execute()
+        if not resp.data:
+            print(f"\n  No existe atención con ID {id_atencion}.")
+            return
+    except Exception as e:
+        print(f"\n  Error al buscar atención: {e}")
+        return
+
+    atencion = resp.data[0]
+    print(f"\n  Datos actuales:")
+    print(f"  Hora inicio: {atencion.get('hora_inicio', '')}")
+    print(f"  Hora fin: {atencion.get('hora_fin', '')}")
+    print(f"  Observaciones: {atencion.get('observaciones', '')}")
+
+    print("\n  Deje en blanco para mantener el valor actual:\n")
+    hora_inicio = input(f"  Hora inicio [{atencion.get('hora_inicio', '')}]: ").strip()
+    hora_fin = input(f"  Hora fin [{atencion.get('hora_fin', '')}]: ").strip()
+    observaciones = input(f"  Observaciones [{atencion.get('observaciones', '')}]: ").strip()
+
+    datos = {}
+    if hora_inicio:
+        datos["hora_inicio"] = hora_inicio
+    if hora_fin:
+        datos["hora_fin"] = hora_fin
+    if observaciones:
+        datos["observaciones"] = observaciones
+
+    if not datos:
+        print("\n  No se realizaron cambios.")
+        return
+
+    try:
+        supabase.table("atencion_estetica").update(datos).eq("id_peluqueria", id_atencion).execute()
+        print(f"\n  Atención {id_atencion} actualizada exitosamente.")
+    except Exception as e:
+        print(f"\n  Error al actualizar atención: {e}")
+
+
+def eliminar_atencion_estetica():
+    titulo("ELIMINAR ATENCIÓN ESTÉTICA")
+
+    try:
+        resp = supabase.table("atencion_estetica").select("*").execute()
+        if not resp.data:
+            print("  No hay atenciones estéticas registradas.")
+            return
+        for a in resp.data:
+            print(f"  ID: {a['id_peluqueria']}  |  Mascota: {a.get('idmascota', '')}  |  Inicio: {a.get('hora_inicio', '')}")
+    except Exception as e:
+        print(f"  Error al cargar atenciones: {e}")
+        return
+
+    id_atencion = _input_numero("  ID de la atención a eliminar: ")
+
+    confirmar = input(f"\n  ¿Eliminar atención {id_atencion}? (s/n): ").strip().lower()
+    if confirmar != "s":
+        print("  Eliminación cancelada.")
+        return
+
+    try:
+        supabase.table("atencion_estetica").delete().eq("id_peluqueria", id_atencion).execute()
+        print(f"\n  Atención {id_atencion} eliminada exitosamente.")
+    except Exception as e:
+        print(f"\n  Error al eliminar atención: {e}")
+
+
+# ---------- MEDICINA_DETALLES ----------
+
+
+def agregar_medicina_detalle():
+    titulo("AGREGAR DETALLE DE MEDICINA")
+
+    print("\n  --- Medicinas disponibles ---")
+    try:
+        resp = supabase.table("producto_servicio").select("*").eq("tipo", "Medicina").execute()
+        if not resp.data:
+            print("  No hay medicinas registradas.")
+            return
+        for m in resp.data:
+            print(f"  {m['codigo_producto_servicio']}  |  {m.get('descripcion', '')}  |  ${m.get('precio', 0)}")
+    except Exception as e:
+        print(f"  Error al cargar medicinas: {e}")
+        return
+
+    cod = _input_no_vacio("  Código de la medicina: ")
+
+    try:
+        resp = supabase.table("medicina_detalles").select("*").eq("codigo_producto_servicio", cod).execute()
+        if resp.data:
+            print(f"\n  Esta medicina ya tiene detalles registrados.")
+            return
+    except Exception:
+        pass
+
+    stock = _input_numero("  Stock disponible: ")
+    caducidad = input("  Fecha de caducidad (YYYY-MM-DD): ").strip()
+    presentacion = input("  Presentación: ").strip()
+
+    detalle = {
+        "codigo_producto_servicio": cod,
+        "stock_disponible": stock,
+        "fecha_caducidad": caducidad or None,
+        "presentacion": presentacion or None,
+    }
+
+    try:
+        supabase.table("medicina_detalles").insert(detalle).execute()
+        print(f"\n  Detalle de medicina {cod} registrado exitosamente.")
+    except Exception as e:
+        print(f"\n  Error al registrar detalle: {e}")
+
+
+def editar_medicina_detalle():
+    titulo("EDITAR DETALLE DE MEDICINA")
+
+    try:
+        resp = supabase.table("medicina_detalles").select("*").execute()
+        if not resp.data:
+            print("  No hay detalles de medicinas registrados.")
+            return
+        for m in resp.data:
+            print(f"  Código: {m.get('codigo_producto_servicio', '')}  |  Stock: {m.get('stock_disponible', 0)}  |  Presentación: {m.get('presentacion', '')}")
+    except Exception as e:
+        print(f"  Error al cargar detalles: {e}")
+        return
+
+    cod = _input_no_vacio("  Código de la medicina a editar: ")
+
+    try:
+        resp = supabase.table("medicina_detalles").select("*").eq("codigo_producto_servicio", cod).execute()
+        if not resp.data:
+            print(f"\n  No existe detalle para medicina {cod}.")
+            return
+    except Exception as e:
+        print(f"\n  Error al buscar detalle: {e}")
+        return
+
+    det = resp.data[0]
+    print(f"\n  Datos actuales:")
+    print(f"  Stock: {det.get('stock_disponible', 0)}")
+    print(f"  Caducidad: {det.get('fecha_caducidad', '')}")
+    print(f"  Presentación: {det.get('presentacion', '')}")
+
+    print("\n  Deje en blanco para mantener el valor actual:\n")
+    stock = input(f"  Stock [{det.get('stock_disponible', 0)}]: ").strip()
+    caducidad = input(f"  Caducidad [{det.get('fecha_caducidad', '')}]: ").strip()
+    presentacion = input(f"  Presentación [{det.get('presentacion', '')}]: ").strip()
+
+    datos = {}
+    if stock:
+        try:
+            datos["stock_disponible"] = int(stock)
+        except ValueError:
+            print("  Stock inválido.")
+    if caducidad:
+        datos["fecha_caducidad"] = caducidad
+    if presentacion:
+        datos["presentacion"] = presentacion
+
+    if not datos:
+        print("\n  No se realizaron cambios.")
+        return
+
+    try:
+        supabase.table("medicina_detalles").update(datos).eq("codigo_producto_servicio", cod).execute()
+        print(f"\n  Medicina {cod} actualizada exitosamente.")
+    except Exception as e:
+        print(f"\n  Error al actualizar medicina: {e}")
+
+
+def eliminar_medicina_detalle():
+    titulo("ELIMINAR DETALLE DE MEDICINA")
+
+    try:
+        resp = supabase.table("medicina_detalles").select("*").execute()
+        if not resp.data:
+            print("  No hay detalles de medicinas registrados.")
+            return
+        for m in resp.data:
+            print(f"  Código: {m.get('codigo_producto_servicio', '')}  |  Stock: {m.get('stock_disponible', 0)}  |  Presentación: {m.get('presentacion', '')}")
+    except Exception as e:
+        print(f"  Error al cargar detalles: {e}")
+        return
+
+    cod = _input_no_vacio("  Código de la medicina a eliminar: ")
+
+    confirmar = input(f"\n  ¿Eliminar detalle de medicina {cod}? (s/n): ").strip().lower()
+    if confirmar != "s":
+        print("  Eliminación cancelada.")
+        return
+
+    try:
+        supabase.table("medicina_detalles").delete().eq("codigo_producto_servicio", cod).execute()
+        print(f"\n  Detalle de medicina {cod} eliminado exitosamente.")
+    except Exception as e:
+        print(f"\n  Error al eliminar detalle: {e}")
+
+
+# ---------- ACCESORIO_DETALLES ----------
+
+
+def agregar_accesorio_detalle():
+    titulo("AGREGAR DETALLE DE ACCESORIO")
+
+    print("\n  --- Accesorios disponibles ---")
+    try:
+        resp = supabase.table("producto_servicio").select("*").eq("tipo", "Accesorio").execute()
+        if not resp.data:
+            print("  No hay accesorios registrados.")
+            return
+        for a in resp.data:
+            print(f"  {a['codigo_producto_servicio']}  |  {a.get('descripcion', '')}  |  ${a.get('precio', 0)}")
+    except Exception as e:
+        print(f"  Error al cargar accesorios: {e}")
+        return
+
+    cod = _input_no_vacio("  Código del accesorio: ")
+
+    try:
+        resp = supabase.table("accesorio_detalles").select("*").eq("codigo_producto_servicio", cod).execute()
+        if resp.data:
+            print(f"\n  Este accesorio ya tiene detalles registrados.")
+            return
+    except Exception:
+        pass
+
+    stock = _input_numero("  Stock disponible: ")
+    categoria = input("  Categoría: ").strip()
+    marca = input("  Marca: ").strip()
+
+    detalle = {
+        "codigo_producto_servicio": cod,
+        "stock_disponible": stock,
+        "categoria": categoria or None,
+        "marca": marca or None,
+    }
+
+    try:
+        supabase.table("accesorio_detalles").insert(detalle).execute()
+        print(f"\n  Detalle de accesorio {cod} registrado exitosamente.")
+    except Exception as e:
+        print(f"\n  Error al registrar detalle: {e}")
+
+
+def editar_accesorio_detalle():
+    titulo("EDITAR DETALLE DE ACCESORIO")
+
+    try:
+        resp = supabase.table("accesorio_detalles").select("*").execute()
+        if not resp.data:
+            print("  No hay detalles de accesorios registrados.")
+            return
+        for a in resp.data:
+            print(f"  Código: {a.get('codigo_producto_servicio', '')}  |  Stock: {a.get('stock_disponible', 0)}  |  Categoría: {a.get('categoria', '')}")
+    except Exception as e:
+        print(f"  Error al cargar detalles: {e}")
+        return
+
+    cod = _input_no_vacio("  Código del accesorio a editar: ")
+
+    try:
+        resp = supabase.table("accesorio_detalles").select("*").eq("codigo_producto_servicio", cod).execute()
+        if not resp.data:
+            print(f"\n  No existe detalle para accesorio {cod}.")
+            return
+    except Exception as e:
+        print(f"\n  Error al buscar detalle: {e}")
+        return
+
+    det = resp.data[0]
+    print(f"\n  Datos actuales:")
+    print(f"  Stock: {det.get('stock_disponible', 0)}")
+    print(f"  Categoría: {det.get('categoria', '')}")
+    print(f"  Marca: {det.get('marca', '')}")
+
+    print("\n  Deje en blanco para mantener el valor actual:\n")
+    stock = input(f"  Stock [{det.get('stock_disponible', 0)}]: ").strip()
+    categoria = input(f"  Categoría [{det.get('categoria', '')}]: ").strip()
+    marca = input(f"  Marca [{det.get('marca', '')}]: ").strip()
+
+    datos = {}
+    if stock:
+        try:
+            datos["stock_disponible"] = int(stock)
+        except ValueError:
+            print("  Stock inválido.")
+    if categoria:
+        datos["categoria"] = categoria
+    if marca:
+        datos["marca"] = marca
+
+    if not datos:
+        print("\n  No se realizaron cambios.")
+        return
+
+    try:
+        supabase.table("accesorio_detalles").update(datos).eq("codigo_producto_servicio", cod).execute()
+        print(f"\n  Accesorio {cod} actualizado exitosamente.")
+    except Exception as e:
+        print(f"\n  Error al actualizar accesorio: {e}")
+
+
+def eliminar_accesorio_detalle():
+    titulo("ELIMINAR DETALLE DE ACCESORIO")
+
+    try:
+        resp = supabase.table("accesorio_detalles").select("*").execute()
+        if not resp.data:
+            print("  No hay detalles de accesorios registrados.")
+            return
+        for a in resp.data:
+            print(f"  Código: {a.get('codigo_producto_servicio', '')}  |  Stock: {a.get('stock_disponible', 0)}  |  Categoría: {a.get('categoria', '')}")
+    except Exception as e:
+        print(f"  Error al cargar detalles: {e}")
+        return
+
+    cod = _input_no_vacio("  Código del accesorio a eliminar: ")
+
+    confirmar = input(f"\n  ¿Eliminar detalle de accesorio {cod}? (s/n): ").strip().lower()
+    if confirmar != "s":
+        print("  Eliminación cancelada.")
+        return
+
+    try:
+        supabase.table("accesorio_detalles").delete().eq("codigo_producto_servicio", cod).execute()
+        print(f"\n  Detalle de accesorio {cod} eliminado exitosamente.")
+    except Exception as e:
+        print(f"\n  Error al eliminar detalle: {e}")
+
+
+# ---------- SERVICIO_DETALLES ----------
+
+
+def agregar_servicio_detalle():
+    titulo("AGREGAR DETALLE DE SERVICIO")
+
+    print("\n  --- Servicios disponibles ---")
+    try:
+        resp = supabase.table("producto_servicio").select("*").eq("tipo", "Servicio").execute()
+        if not resp.data:
+            print("  No hay servicios registrados.")
+            return
+        for s in resp.data:
+            print(f"  {s['codigo_producto_servicio']}  |  {s.get('descripcion', '')}  |  ${s.get('precio', 0)}")
+    except Exception as e:
+        print(f"  Error al cargar servicios: {e}")
+        return
+
+    cod = _input_no_vacio("  Código del servicio: ")
+
+    try:
+        resp = supabase.table("servicio_detalles").select("*").eq("codigo_producto_servicio", cod).execute()
+        if resp.data:
+            print(f"\n  Este servicio ya tiene detalles registrados.")
+            return
+    except Exception:
+        pass
+
+    duracion = _input_numero("  Duración estimada (minutos): ")
+    requiere = input("  ¿Requiere cita? (s/n): ").strip().lower() == "s"
+
+    detalle = {
+        "codigo_producto_servicio": cod,
+        "duracion_estimada": duracion,
+        "requiere_cita": requiere,
+    }
+
+    try:
+        supabase.table("servicio_detalles").insert(detalle).execute()
+        print(f"\n  Detalle de servicio {cod} registrado exitosamente.")
+    except Exception as e:
+        print(f"\n  Error al registrar detalle: {e}")
+
+
+def editar_servicio_detalle():
+    titulo("EDITAR DETALLE DE SERVICIO")
+
+    try:
+        resp = supabase.table("servicio_detalles").select("*").execute()
+        if not resp.data:
+            print("  No hay detalles de servicios registrados.")
+            return
+        for s in resp.data:
+            req = "Sí" if s.get("requiere_cita") else "No"
+            print(f"  Código: {s.get('codigo_producto_servicio', '')}  |  Duración: {s.get('duracion_estimada', 0)} min  |  Requiere cita: {req}")
+    except Exception as e:
+        print(f"  Error al cargar detalles: {e}")
+        return
+
+    cod = _input_no_vacio("  Código del servicio a editar: ")
+
+    try:
+        resp = supabase.table("servicio_detalles").select("*").eq("codigo_producto_servicio", cod).execute()
+        if not resp.data:
+            print(f"\n  No existe detalle para servicio {cod}.")
+            return
+    except Exception as e:
+        print(f"\n  Error al buscar detalle: {e}")
+        return
+
+    det = resp.data[0]
+    req_actual = "Sí" if det.get("requiere_cita") else "No"
+    print(f"\n  Datos actuales:")
+    print(f"  Duración: {det.get('duracion_estimada', 0)} minutos")
+    print(f"  Requiere cita: {req_actual}")
+
+    duracion = input(f"\n  Nueva duración [{det.get('duracion_estimada', 0)}]: ").strip()
+    requiere = input(f"  Requiere cita (s/n) [{req_actual}]: ").strip().lower()
+
+    datos = {}
+    if duracion:
+        try:
+            datos["duracion_estimada"] = int(duracion)
+        except ValueError:
+            print("  Duración inválida.")
+    if requiere in ("s", "n"):
+        datos["requiere_cita"] = requiere == "s"
+
+    if not datos:
+        print("\n  No se realizaron cambios.")
+        return
+
+    try:
+        supabase.table("servicio_detalles").update(datos).eq("codigo_producto_servicio", cod).execute()
+        print(f"\n  Servicio {cod} actualizado exitosamente.")
+    except Exception as e:
+        print(f"\n  Error al actualizar servicio: {e}")
+
+
+def eliminar_servicio_detalle():
+    titulo("ELIMINAR DETALLE DE SERVICIO")
+
+    try:
+        resp = supabase.table("servicio_detalles").select("*").execute()
+        if not resp.data:
+            print("  No hay detalles de servicios registrados.")
+            return
+        for s in resp.data:
+            req = "Sí" if s.get("requiere_cita") else "No"
+            print(f"  Código: {s.get('codigo_producto_servicio', '')}  |  Duración: {s.get('duracion_estimada', 0)} min  |  Requiere cita: {req}")
+    except Exception as e:
+        print(f"  Error al cargar detalles: {e}")
+        return
+
+    cod = _input_no_vacio("  Código del servicio a eliminar: ")
+
+    confirmar = input(f"\n  ¿Eliminar detalle de servicio {cod}? (s/n): ").strip().lower()
+    if confirmar != "s":
+        print("  Eliminación cancelada.")
+        return
+
+    try:
+        supabase.table("servicio_detalles").delete().eq("codigo_producto_servicio", cod).execute()
+        print(f"\n  Detalle de servicio {cod} eliminado exitosamente.")
+    except Exception as e:
+        print(f"\n  Error al eliminar detalle: {e}")
+
+
+# ===================== MENÚ DE EDICIÓN / ELIMINACIÓN =====================
+
+
+def menu_editar_eliminar():
+    while True:
+        print()
+        separador()
+        print("    --- EDITAR / ELIMINAR REGISTROS ---")
+        separador()
+        print("  --- Tablas Principales ---")
+        print("  1. Editar Cliente")
+        print("  2. Editar Mascota")
+        print("  3. Editar Producto / Servicio")
+        print("  4. Editar Cita")
+        print("  5. Editar Consulta Clínica")
+        print("  ---")
+        print("  6. Eliminar Cliente")
+        print("  7. Eliminar Mascota")
+        print("  8. Eliminar Producto / Servicio")
+        print("  9. Eliminar Cita")
+        print("  10. Eliminar Consulta Clínica")
+        print("  --- Tablas de Relación ---")
+        print("  11. Agregar Detalle a Factura")
+        print("  12. Editar Detalle de Factura")
+        print("  13. Eliminar Detalle de Factura")
+        print("  ---")
+        print("  14. Agregar Receta")
+        print("  15. Editar Receta")
+        print("  16. Eliminar Receta")
+        print("  ---")
+        print("  17. Agregar Atención Estética")
+        print("  18. Editar Atención Estética")
+        print("  19. Eliminar Atención Estética")
+        print("  ---")
+        print("  20. Agregar Detalle de Medicina")
+        print("  21. Editar Detalle de Medicina")
+        print("  22. Eliminar Detalle de Medicina")
+        print("  ---")
+        print("  23. Agregar Detalle de Accesorio")
+        print("  24. Editar Detalle de Accesorio")
+        print("  25. Eliminar Detalle de Accesorio")
+        print("  ---")
+        print("  26. Agregar Detalle de Servicio")
+        print("  27. Editar Detalle de Servicio")
+        print("  28. Eliminar Detalle de Servicio")
+        print("  ---")
+        print("  29. Volver")
+        separador()
+
+        opcion = input("  Seleccione una opción (1-29): ").strip()
+
+        if opcion == "1":
+            print()
+            editar_cliente()
+        elif opcion == "2":
+            print()
+            editar_mascota()
+        elif opcion == "3":
+            print()
+            editar_producto()
+        elif opcion == "4":
+            print()
+            editar_cita()
+        elif opcion == "5":
+            print()
+            editar_consulta()
+        elif opcion == "6":
+            print()
+            eliminar_cliente()
+        elif opcion == "7":
+            print()
+            eliminar_mascota()
+        elif opcion == "8":
+            print()
+            eliminar_producto()
+        elif opcion == "9":
+            print()
+            eliminar_cita()
+        elif opcion == "10":
+            print()
+            eliminar_consulta()
+        elif opcion == "11":
+            print()
+            agregar_detalle_factura()
+        elif opcion == "12":
+            print()
+            editar_detalle_factura()
+        elif opcion == "13":
+            print()
+            eliminar_detalle_factura()
+        elif opcion == "14":
+            print()
+            agregar_receta()
+        elif opcion == "15":
+            print()
+            editar_receta()
+        elif opcion == "16":
+            print()
+            eliminar_receta()
+        elif opcion == "17":
+            print()
+            agregar_atencion_estetica()
+        elif opcion == "18":
+            print()
+            editar_atencion_estetica()
+        elif opcion == "19":
+            print()
+            eliminar_atencion_estetica()
+        elif opcion == "20":
+            print()
+            agregar_medicina_detalle()
+        elif opcion == "21":
+            print()
+            editar_medicina_detalle()
+        elif opcion == "22":
+            print()
+            eliminar_medicina_detalle()
+        elif opcion == "23":
+            print()
+            agregar_accesorio_detalle()
+        elif opcion == "24":
+            print()
+            editar_accesorio_detalle()
+        elif opcion == "25":
+            print()
+            eliminar_accesorio_detalle()
+        elif opcion == "26":
+            print()
+            agregar_servicio_detalle()
+        elif opcion == "27":
+            print()
+            editar_servicio_detalle()
+        elif opcion == "28":
+            print()
+            eliminar_servicio_detalle()
+        elif opcion == "29":
+            print("\n  Volviendo al menú anterior...")
+            break
+        else:
+            print("\n  Opción no válida. Intente de nuevo (1-29).")
+
+        input("\n  Presione Enter para continuar...")
+
+
 # ===================== MENÚ DE REGISTROS =====================
 
 
@@ -849,10 +2292,11 @@ def menu_principal():
         separador()
         print("  1. Módulo de Reportes Gerenciales")
         print("  2. Módulo de Registro de Datos")
-        print("  3. Salir")
+        print("  3. Editar / Eliminar Registros")
+        print("  4. Salir")
         separador()
 
-        opcion = input("  Seleccione una opción (1-3): ").strip()
+        opcion = input("  Seleccione una opción (1-4): ").strip()
 
         if opcion == "1":
             print()
@@ -861,10 +2305,13 @@ def menu_principal():
             print()
             menu_registros()
         elif opcion == "3":
+            print()
+            menu_editar_eliminar()
+        elif opcion == "4":
             print("\n  Saliendo del sistema...")
             break
         else:
-            print("\n  Opción no válida. Intente de nuevo (1-3).")
+            print("\n  Opción no válida. Intente de nuevo (1-4).")
 
         input("\n  Presione Enter para continuar...")
 
