@@ -214,6 +214,30 @@ Al ejecutar `python main.py`, aparece el siguiente menú:
 - **Editar (27):** Modificar duración o requisito de cita
 - **Eliminar (28):** Eliminar detalles de un servicio
 
+#### Proveedor (Opciones 29-31)
+- **Registrar (29):** Crear nuevo proveedor con ID, nombre y contacto
+- **Editar (30):** Modificar nombre o contacto del proveedor
+- **Eliminar (31):** Eliminar un proveedor
+
+#### Compra de Insumo (Opciones 32-34)
+- **Registrar (32):** Registrar compra de producto a proveedor
+- **Editar (33):** Modificar cantidad recibida
+- **Eliminar (34):** Eliminar un registro de compra
+
+#### Examen de Laboratorio (Opciones 35-37)
+- **Registrar (35):** Crear examen con tipo de muestra y resultados
+- **Editar (36):** Modificar resultados o tipo de muestra
+- **Eliminar (37):** Eliminar un examen
+
+#### Reserva (Opciones 38-39)
+- **Agregar (38):** Reservar servicio para una cita
+- **Eliminar (39):** Eliminar una reserva
+
+#### Producto en Consulta (Opciones 40-42)
+- **Agregar (40):** Registrar producto utilizado en una consulta
+- **Editar (41):** Modificar cantidad gastada
+- **Eliminar (42):** Eliminar registro de producto
+
 ---
 
 ## 7. TABLAS DEL SISTEMA
@@ -227,6 +251,7 @@ Al ejecutar `python main.py`, aparece el siguiente menú:
 | cita | Citas veterinarias | ID, fecha, estado, mascota, servicio |
 | consulta | Consultas clínicas | ID, fecha, diagnóstico, tratamiento, mascota |
 | factura | Facturas emitidas | N° comprobante, cédula, fecha, estado, forma pago |
+| proveedor | Proveedores | ID, nombre, contacto |
 
 ### Tablas de Relación
 | Tabla | Descripción | Relaciona |
@@ -237,6 +262,10 @@ Al ejecutar `python main.py`, aparece el siguiente menú:
 | medicina_detalles | Detalles de medicinas | producto_servicio |
 | accesorio_detalles | Detalles de accesorios | producto_servicio |
 | servicio_detalles | Detalles de servicios | producto_servicio |
+| compra_insumo | Compras a proveedores | proveedor ↔ producto_servicio |
+| examen_lab | Exámenes de laboratorio | consulta ↔ proveedor |
+| reserva | Reservas de servicios | cita ↔ producto_servicio |
+| consulta_producto | Productos en consultas | consulta ↔ producto_servicio |
 
 ---
 
