@@ -8,12 +8,12 @@ def registrar_mascota():
     nombre = _input_no_vacio("  Nombre de la mascota: ")
 
     sexo = ""
-    while sexo not in ("M", "F"):
-        sexo = input("  Sexo (M/F): ").strip().upper()
-        if sexo not in ("M", "F"):
-            print("  Ingrese 'M' o 'F'.")
+    while sexo not in ("M", "H"):
+        sexo = input("  Sexo (M/H): ").strip().upper()
+        if sexo not in ("M", "H"):
+            print("  Ingrese 'M' o 'H'.")
 
-    edad = _input_numero("  Edad (años): ")
+    fecha_nacimiento = _input_no_vacio("  Fecha de nacimiento (YYYY-MM-DD): ")
     especie = _input_no_vacio("  Especie (Perro, Gato, etc.): ")
     raza = _input_no_vacio("  Raza: ")
 
@@ -21,16 +21,16 @@ def registrar_mascota():
     try:
         resp_cli = supabase.table("cliente").select("*").execute()
         for c in resp_cli.data:
-            print(f"  {c['cedula']}  |  {c.get('nombre', 'N/A')}")
+            print(f"  {c['cedula_cliente']}  |  {c.get('nombre', 'N/A')}")
     except Exception:
         pass
 
-    cedula = _input_no_vacio("  Cédula del dueño: ")
+    cedula_cliente = _input_no_vacio("  Cédula del dueño: ")
 
     try:
-        existe = supabase.table("cliente").select("*").eq("cedula", cedula).execute()
+        existe = supabase.table("cliente").select("*").eq("cedula_cliente", cedula_cliente).execute()
         if not existe.data:
-            print(f"\n  Error: No existe un cliente con cédula {cedula}.")
+            print(f"\n  Error: No existe un cliente con cédula {cedula_cliente}.")
             return
     except Exception:
         pass
@@ -47,15 +47,15 @@ def registrar_mascota():
         "idmascota": nuevo_id,
         "nombre": nombre,
         "sexo": sexo,
-        "edad": edad,
+        "fecha_nacimiento": fecha_nacimiento,
         "especie": especie,
         "raza": raza,
-        "cedula": cedula,
+        "cedula_cliente": cedula_cliente,
     }
 
     try:
         supabase.table("mascota").insert(mascota).execute()
-        print(f"\n  Mascota '{nombre}' ({especie} - {raza}) registrada con ID {nuevo_id} (Dueño: {cedula}).")
+        print(f"\n  Mascota '{nombre}' ({especie} - {raza}) registrada con ID {nuevo_id} (Dueño: {cedula_cliente}).")
     except Exception as e:
         print(f"\n  Error al registrar mascota: {e}")
 
@@ -81,27 +81,24 @@ def editar_mascota():
     print(f"\n  Datos actuales:")
     print(f"  Nombre: {mascota.get('nombre', '')}")
     print(f"  Sexo: {mascota.get('sexo', '')}")
-    print(f"  Edad: {mascota.get('edad', '')}")
+    print(f"  Fecha nacimiento: {mascota.get('fecha_nacimiento', '')}")
     print(f"  Especie: {mascota.get('especie', '')}")
     print(f"  Raza: {mascota.get('raza', '')}")
 
     print("\n  Deje en blanco para mantener el valor actual:\n")
     nombre = input(f"  Nombre [{mascota.get('nombre', '')}]: ").strip()
     sexo = input(f"  Sexo [{mascota.get('sexo', '')}]: ").strip().upper()
-    edad = input(f"  Edad [{mascota.get('edad', '')}]: ").strip()
+    fecha_nacimiento = input(f"  Fecha nacimiento [{mascota.get('fecha_nacimiento', '')}]: ").strip()
     especie = input(f"  Especie [{mascota.get('especie', '')}]: ").strip()
     raza = input(f"  Raza [{mascota.get('raza', '')}]: ").strip()
 
     datos = {}
     if nombre:
         datos["nombre"] = nombre
-    if sexo and sexo in ("M", "F"):
+    if sexo and sexo in ("M", "H"):
         datos["sexo"] = sexo
-    if edad:
-        try:
-            datos["edad"] = int(edad)
-        except ValueError:
-            print("  Edad inválida, se mantendrá la anterior.")
+    if fecha_nacimiento:
+        datos["fecha_nacimiento"] = fecha_nacimiento
     if especie:
         datos["especie"] = especie
     if raza:

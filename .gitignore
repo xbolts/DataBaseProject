@@ -1,6 +1,9 @@
 # Embedded repos
 DataBaseProject/
 
+# Miscellaneous
+miscelaneos/
+
 # Environment variables
 .env
 .env.local

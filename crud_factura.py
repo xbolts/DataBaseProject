@@ -12,30 +12,35 @@ def registrar_factura():
         return
 
     for c in resp_cli.data:
-        print(f"  {c['cedula']}  |  {c.get('nombre', 'N/A')}")
+        print(f"  {c['cedula_cliente']}  |  {c.get('nombre', 'N/A')}")
 
-    cedula = _input_no_vacio("  Cédula del cliente: ")
+    cedula_cliente = _input_no_vacio("  Cédula del cliente: ")
 
-    if not any(cl["cedula"] == cedula for cl in resp_cli.data):
-        print(f"\n  Error: No existe un cliente con cédula {cedula}.")
+    if not any(cl["cedula_cliente"] == cedula_cliente for cl in resp_cli.data):
+        print(f"\n  Error: No existe un cliente con cédula {cedula_cliente}.")
         return
 
     estado_pago = ""
-    while estado_pago not in ("Pagado", "Pendiente", "Anulado"):
-        estado_pago = input("  Estado de pago (Pagado/Pendiente/Anulado): ").strip().capitalize()
-        if estado_pago not in ("Pagado", "Pendiente", "Anulado"):
-            print("  Opciones válidas: Pagado, Pendiente, Anulado.")
+    while estado_pago not in ("PAGADA", "PENDIENTE", "ANULADA"):
+        estado_pago = input("  Estado de pago (PAGADA/PENDIENTE/ANULADA): ").strip().upper()
+        if estado_pago not in ("PAGADA", "PENDIENTE", "ANULADA"):
+            print("  Opciones válidas: PAGADA, PENDIENTE, ANULADA.")
 
     forma_pago = ""
-    while forma_pago not in ("Efectivo", "Tarjeta", "Transferencia", "Ninguna"):
-        forma_pago = input("  Forma de pago (Efectivo/Tarjeta/Transferencia/Ninguna): ").strip().capitalize()
-        if forma_pago not in ("Efectivo", "Tarjeta", "Transferencia", "Ninguna"):
-            print("  Opciones válidas: Efectivo, Tarjeta, Transferencia, Ninguna.")
+    while forma_pago not in ("EFECTIVO", "TARJETA_CREDITO", "TARJETA_DEBITO", "TRANSFERENCIA"):
+        forma_pago = input("  Forma de pago (EFECTIVO/TARJETA_CREDITO/TARJETA_DEBITO/TRANSFERENCIA): ").strip().upper()
+        if forma_pago not in ("EFECTIVO", "TARJETA_CREDITO", "TARJETA_DEBITO", "TRANSFERENCIA"):
+            print("  Opciones válidas: EFECTIVO, TARJETA_CREDITO, TARJETA_DEBITO, TRANSFERENCIA.")
 
     try:
         resp = supabase.table("factura").select("num_comprobante").order("num_comprobante", desc=True).execute()
-        max_id = resp.data[0]["num_comprobante"] if resp.data else 0
-        nuevo_num = max_id + 1
+        if resp.data:
+            ultimo = resp.data[0]["num_comprobante"]
+            partes = ultimo.split("-")
+            num_secuencial = int(partes[2]) + 1
+        else:
+            num_secuencial = 1
+        nuevo_num = f"001-001-{num_secuencial:09d}"
     except Exception as e:
         print(f"\n  Error al obtener número de comprobante: {e}")
         return
@@ -80,7 +85,7 @@ def registrar_factura():
 
     total = sum(d["subtotal"] for d in detalles)
     print(f"\n  --- RESUMEN FACTURA {nuevo_num} ---")
-    print(f"  Cliente: {cedula}")
+    print(f"  Cliente: {cedula_cliente}")
     print(f"  Productos: {len(detalles)}")
     print(f"  Total: ${total:,.2f}")
 
@@ -91,7 +96,7 @@ def registrar_factura():
 
     factura = {
         "num_comprobante": nuevo_num,
-        "cedula": cedula,
+        "cedula_cliente": cedula_cliente,
         "estado_pago": estado_pago,
         "forma_pago": forma_pago,
     }
@@ -118,12 +123,12 @@ def agregar_detalle_factura():
             return
         print("\n  --- Facturas disponibles ---")
         for f in resp.data:
-            print(f"  N° {f['num_comprobante']}  |  Cliente: {f.get('cedula', '')}  |  Estado: {f.get('estado_pago', '')}")
+            print(f"  N° {f['num_comprobante']}  |  Cliente: {f.get('cedula_cliente', '')}  |  Estado: {f.get('estado_pago', '')}")
     except Exception as e:
         print(f"  Error al cargar facturas: {e}")
         return
 
-    num_comp = _input_numero("  N° de comprobante: ")
+    num_comp = _input_no_vacio("  N° de comprobante: ")
 
     try:
         resp = supabase.table("factura").select("*").eq("num_comprobante", num_comp).execute()
@@ -179,7 +184,7 @@ def agregar_detalle_factura():
 def editar_detalle_factura():
     titulo("EDITAR DETALLE DE FACTURA")
 
-    num_comp = _input_numero("  N° de comprobante: ")
+    num_comp = _input_no_vacio("  N° de comprobante: ")
 
     try:
         resp = supabase.table("factura_detalle").select("*").eq("num_comprobante", num_comp).execute()
@@ -243,7 +248,7 @@ def editar_detalle_factura():
 def eliminar_detalle_factura():
     titulo("ELIMINAR DETALLE DE FACTURA")
 
-    num_comp = _input_numero("  N° de comprobante: ")
+    num_comp = _input_no_vacio("  N° de comprobante: ")
 
     try:
         resp = supabase.table("factura_detalle").select("*").eq("num_comprobante", num_comp).execute()

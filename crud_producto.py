@@ -5,17 +5,11 @@ from utils import titulo, _input_no_vacio, _input_numero
 def registrar_producto():
     titulo("REGISTRAR PRODUCTO / SERVICIO")
 
-    codigo = _input_no_vacio("  Código (ej: SERV-004, MED-004, ACC-005): ")
+    codigo = _input_no_vacio("  Código (ej: SER-004, MED-004, ACC-005): ")
     descripcion = _input_no_vacio("  Descripción: ")
 
-    tipo = ""
-    while tipo not in ("Servicio", "Medicina", "Accesorio"):
-        tipo = input("  Tipo (Servicio/Medicina/Accesorio): ").strip().capitalize()
-        if tipo not in ("Servicio", "Medicina", "Accesorio"):
-            print("  Opciones válidas: Servicio, Medicina, Accesorio.")
-
     precio = _input_numero("  Precio: ", float)
-    tipo_iva = _input_numero("  Tipo IVA (%): ", float)
+    porcentaje_iva = _input_numero("  Porcentaje IVA (%): ", float)
 
     try:
         existe = supabase.table("producto_servicio").select("*").eq("codigo_producto_servicio", codigo).execute()
@@ -29,19 +23,18 @@ def registrar_producto():
         "codigo_producto_servicio": codigo,
         "descripcion": descripcion,
         "precio": precio,
-        "tipo_iva": tipo_iva,
-        "tipo": tipo,
+        "porcentaje_iva": porcentaje_iva,
     }
 
     try:
         supabase.table("producto_servicio").insert(producto).execute()
         print(f"\n  Producto '{descripcion}' registrado exitosamente.")
 
-        if tipo == "Medicina":
+        if codigo.upper().startswith("MED-"):
             stock = _input_numero("  Stock disponible: ")
             cad = input("  Fecha de caducidad (YYYY-MM-DD): ").strip()
             pres = input("  Presentación: ").strip()
-            supabase.table("medicina_detalles").insert({
+            supabase.table("medicina").insert({
                 "codigo_producto_servicio": codigo,
                 "stock_disponible": stock,
                 "fecha_caducidad": cad or None,
@@ -49,11 +42,11 @@ def registrar_producto():
             }).execute()
             print("  Detalles de medicina registrados.")
 
-        elif tipo == "Accesorio":
+        elif codigo.upper().startswith("ACC-"):
             stock = _input_numero("  Stock disponible: ")
             cat = input("  Categoría: ").strip()
             mar = input("  Marca: ").strip()
-            supabase.table("accesorio_detalles").insert({
+            supabase.table("accesorio").insert({
                 "codigo_producto_servicio": codigo,
                 "stock_disponible": stock,
                 "categoria": cat or None,
@@ -61,10 +54,10 @@ def registrar_producto():
             }).execute()
             print("  Detalles de accesorio registrados.")
 
-        elif tipo == "Servicio":
+        elif codigo.upper().startswith("SER-"):
             duracion = _input_numero("  Duración estimada (minutos): ")
             requiere = input("  ¿Requiere cita? (s/n): ").strip().lower() == "s"
-            supabase.table("servicio_detalles").insert({
+            supabase.table("servicio").insert({
                 "codigo_producto_servicio": codigo,
                 "duracion_estimada": duracion,
                 "requiere_cita": requiere,
@@ -93,13 +86,12 @@ def editar_producto():
     print(f"\n  Datos actuales:")
     print(f"  Descripción: {prod.get('descripcion', '')}")
     print(f"  Precio: ${prod.get('precio', 0)}")
-    print(f"  Tipo IVA: {prod.get('tipo_iva', '')}%")
-    print(f"  Tipo: {prod.get('tipo', '')}")
+    print(f"  Porcentaje IVA: {prod.get('porcentaje_iva', '')}%")
 
     print("\n  Deje en blanco para mantener el valor actual:\n")
     descripcion = input(f"  Descripción [{prod.get('descripcion', '')}]: ").strip()
     precio = input(f"  Precio [{prod.get('precio', 0)}]: ").strip()
-    tipo_iva = input(f"  Tipo IVA [{prod.get('tipo_iva', '')}]: ").strip()
+    porcentaje_iva = input(f"  Porcentaje IVA [{prod.get('porcentaje_iva', '')}]: ").strip()
 
     datos = {}
     if descripcion:
@@ -109,9 +101,9 @@ def editar_producto():
             datos["precio"] = float(precio)
         except ValueError:
             print("  Precio inválido, se mantendrá el anterior.")
-    if tipo_iva:
+    if porcentaje_iva:
         try:
-            datos["tipo_iva"] = float(tipo_iva)
+            datos["porcentaje_iva"] = float(porcentaje_iva)
         except ValueError:
             print("  IVA inválido, se mantendrá el anterior.")
 
@@ -144,7 +136,6 @@ def eliminar_producto():
     print(f"\n  Producto a eliminar:")
     print(f"  Código: {prod.get('codigo_producto_servicio', '')}")
     print(f"  Descripción: {prod.get('descripcion', '')}")
-    print(f"  Tipo: {prod.get('tipo', '')}")
     print(f"  Precio: ${prod.get('precio', 0)}")
 
     confirmar = input("\n  ¿Está seguro de eliminar este producto? (s/n): ").strip().lower()

@@ -391,7 +391,7 @@ def agregar_reserva():
 
     print("\n  --- Servicios disponibles ---")
     try:
-        resp = supabase.table("producto_servicio").select("*").eq("tipo", "Servicio").execute()
+        resp = supabase.table("producto_servicio").select("*").like("codigo_producto_servicio", "SER-%").execute()
         for s in resp.data:
             print(f"  {s['codigo_producto_servicio']}  |  {s.get('descripcion', '')}  |  ${s.get('precio', 0)}")
     except Exception as e:

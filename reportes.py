@@ -5,14 +5,14 @@ from datetime import date
 
 def _mostrar_facturas(facturas, etiqueta_fecha):
     print(f"\n  Fecha: {etiqueta_fecha}")
-    print(f"\n  {'N° Comp.':<12} {'Cédula':<12} {'Estado Pago':<15} {'Forma Pago':<12}")
-    print(f"  {'-'*10:<12} {'-'*10:<12} {'-'*13:<15} {'-'*10:<12}")
+    print(f"\n  {'N° Comp.':<16} {'Cédula':<12} {'Estado Pago':<15} {'Forma Pago':<18}")
+    print(f"  {'-'*14:<16} {'-'*10:<12} {'-'*13:<15} {'-'*16:<18}")
 
     total_general = 0.0
 
     for f in facturas:
         num = f["num_comprobante"]
-        cedula = f["cedula"]
+        cedula = f["cedula_cliente"]
         estado = f.get("estado_pago", "N/A") or "N/A"
         forma = f.get("forma_pago", "N/A") or "N/A"
 
@@ -28,7 +28,7 @@ def _mostrar_facturas(facturas, etiqueta_fecha):
             total_factura += float(subtotal)
 
         total_general += total_factura
-        print(f"  {str(num):<12} {cedula:<12} {estado:<15} {forma:<12}  Total: ${total_factura:,.2f}")
+        print(f"  {str(num):<16} {cedula:<12} {estado:<15} {forma:<18}  Total: ${total_factura:,.2f}")
 
     separador()
     print(f"  TOTAL: ${total_general:,.2f}")
@@ -94,18 +94,18 @@ def reporte_banos_programados():
     except Exception:
         pass
 
-    print(f"\n  {'ID Atención':<10} {'Mascota':<18} {'Hora Inicio':<14} {'Hora Fin':<14} {'Observaciones'}")
-    print(f"  {'-'*8:<10} {'-'*16:<18} {'-'*12:<14} {'-'*12:<14} {'-'*25}")
+    print(f"\n  {'ID Atención':<12} {'Mascota':<18} {'Hora Inicio':<14} {'Hora Fin':<14} {'Observaciones'}")
+    print(f"  {'-'*10:<12} {'-'*16:<18} {'-'*12:<14} {'-'*12:<14} {'-'*25}")
 
     for r in registros:
-        id_atencion = r["id_peluqueria"]
+        id_atencion = r["id_atencion_estetica"]
         id_mascota = r["idmascota"]
         nombre_mascota = nombres_mascotas.get(id_mascota, f"ID {id_mascota}")
         h_inicio = r.get("hora_inicio", "N/A") or "N/A"
         h_fin = r.get("hora_fin", "N/A") or "N/A"
         obs = r.get("observaciones", "") or ""
 
-        print(f"  {str(id_atencion):<10} {nombre_mascota:<18} {h_inicio:<14} {h_fin:<14} {obs}")
+        print(f"  {str(id_atencion):<12} {nombre_mascota:<18} {h_inicio:<14} {h_fin:<14} {obs}")
 
     separador()
     print(f"  Total de registros: {len(registros)}")
@@ -119,13 +119,13 @@ def reporte_alerta_stock():
     accesorios = []
 
     try:
-        resp_med = supabase.table("medicina_detalles").select("*").execute()
+        resp_med = supabase.table("medicina").select("*").execute()
         medicinas = resp_med.data
     except Exception as e:
         print(f"\n  Error al consultar medicinas: {e}")
 
     try:
-        resp_acc = supabase.table("accesorio_detalles").select("*").execute()
+        resp_acc = supabase.table("accesorio").select("*").execute()
         accesorios = resp_acc.data
     except Exception as e:
         print(f"  Error al consultar accesorios: {e}")
@@ -206,14 +206,14 @@ def reporte_historial_clinico():
 
     if es_cedula:
         try:
-            resp_cli = supabase.table("cliente").select("*").eq("cedula", busqueda).execute()
+            resp_cli = supabase.table("cliente").select("*").eq("cedula_cliente", busqueda).execute()
             if resp_cli.data:
                 cliente_encontrado = resp_cli.data[0]
         except Exception:
             pass
 
         try:
-            resp_m = supabase.table("mascota").select("*").eq("cedula", busqueda).execute()
+            resp_m = supabase.table("mascota").select("*").eq("cedula_cliente", busqueda).execute()
             mascotas_dueño = resp_m.data
         except Exception:
             mascotas_dueño = []
@@ -223,12 +223,12 @@ def reporte_historial_clinico():
         elif len(mascotas_dueño) > 1:
             print(f"\n  Cliente: {cliente_encontrado.get('nombre', 'N/A') if cliente_encontrado else busqueda}")
             print("  Mascotas registradas:")
-            print(f"  {'ID':<8} {'Nombre':<15} {'Especie':<12} {'Raza':<20} {'Edad'}")
-            print(f"  {'-'*6:<8} {'-'*13:<15} {'-'*10:<12} {'-'*18:<20} {'-'*4}")
+            print(f"  {'ID':<8} {'Nombre':<15} {'Especie':<12} {'Raza':<20} {'Fecha Nac.'}")
+            print(f"  {'-'*6:<8} {'-'*13:<15} {'-'*10:<12} {'-'*18:<20} {'-'*12}")
             for m in mascotas_dueño:
-                edad = m.get("edad", "N/A") or "N/A"
+                fecha_nac = m.get("fecha_nacimiento", "N/A") or "N/A"
                 nom = m.get("nombre", "N/A") or "N/A"
-                print(f"  {str(m['idmascota']):<8} {nom:<15} {m.get('especie', 'N/A'):<12} {m.get('raza', 'N/A'):<20} {edad}")
+                print(f"  {str(m['idmascota']):<8} {nom:<15} {m.get('especie', 'N/A'):<12} {m.get('raza', 'N/A'):<20} {fecha_nac}")
             seleccion = input("\n  Ingrese el ID de la mascota: ").strip()
             try:
                 mascota_encontrada = next(
@@ -258,9 +258,9 @@ def reporte_historial_clinico():
             except (ValueError, Exception):
                 pass
 
-        if mascota_encontrada and mascota_encontrada.get("cedula"):
+        if mascota_encontrada and mascota_encontrada.get("cedula_cliente"):
             try:
-                resp_cli = supabase.table("cliente").select("*").eq("cedula", mascota_encontrada["cedula"]).execute()
+                resp_cli = supabase.table("cliente").select("*").eq("cedula_cliente", mascota_encontrada["cedula_cliente"]).execute()
                 if resp_cli.data:
                     cliente_encontrado = resp_cli.data[0]
             except Exception:
@@ -291,10 +291,10 @@ def reporte_historial_clinico():
 
     nombre_mascota = mascota_encontrada.get("nombre", "N/A") or "N/A"
     esp = mascota_encontrada.get("especie", "N/A") or "N/A"
-    edad = mascota_encontrada.get("edad", "N/A") or "N/A"
+    fecha_nac = mascota_encontrada.get("fecha_nacimiento", "N/A") or "N/A"
     raza = mascota_encontrada.get("raza", "N/A") or "N/A"
     sexo = mascota_encontrada.get("sexo", "N/A") or "N/A"
-    print(f"\n  PACIENTE: {nombre_mascota} ({raza} {esp})    EDAD: {edad} años    SEXO: {sexo}")
+    print(f"\n  PACIENTE: {nombre_mascota} ({raza} {esp})    NACIMIENTO: {fecha_nac}    SEXO: {sexo}")
     print(f"  ID MASCOTA: {mascota_encontrada['idmascota']}")
 
     if cliente_encontrado:
@@ -302,7 +302,7 @@ def reporte_historial_clinico():
         tel = cliente_encontrado.get("telefono", "N/A") or "N/A"
         dir_ = cliente_encontrado.get("direccion", "N/A") or "N/A"
         print(f"\n  PROPIETARIO: {nombre}    CONTACTO: {tel}")
-        print(f"  CÉDULA: {cliente_encontrado['cedula']}    DIRECCIÓN: {dir_}")
+        print(f"  CÉDULA: {cliente_encontrado['cedula_cliente']}    DIRECCIÓN: {dir_}")
 
     separador()
 
@@ -321,8 +321,8 @@ def reporte_historial_clinico():
 
         rec = recetas.get(c["id_consulta"])
         receta_texto = ""
-        if rec and rec.get("indicaciones_en_casa"):
-            receta_texto = f"\n  {'':14} | {'':35} | Casa: {rec['indicaciones_en_casa']}"
+        if rec and rec.get("indicaciones_casa"):
+            receta_texto = f"\n  {'':14} | {'':35} | Casa: {rec['indicaciones_casa']}"
 
         diag_corto = diag[:33] + "..." if len(diag) > 35 else diag
         trat_corto = trat[:30] + "..." if len(trat) > 33 else trat

@@ -12,7 +12,7 @@ def registrar_cita():
 
     print("\n  --- Servicios disponibles ---")
     try:
-        resp = supabase.table("producto_servicio").select("*").eq("tipo", "Servicio").execute()
+        resp = supabase.table("producto_servicio").select("*").like("codigo_producto_servicio", "SER-%").execute()
         servicios = resp.data
     except Exception as e:
         print(f"  Error al cargar servicios: {e}")
@@ -32,10 +32,12 @@ def registrar_cita():
         return
 
     estado = ""
-    while estado not in ("Programada", "En progreso", "Finalizada", "Cancelada"):
-        estado = input("  Estado (Programada/En progreso/Finalizada/Cancelada): ").strip().capitalize()
-        if estado not in ("Programada", "En progreso", "Finalizada", "Cancelada"):
-            print("  Opciones válidas: Programada, En progreso, Finalizada, Cancelada.")
+    while estado not in ("PROGRAMADA", "ATENDIDA", "CANCELADA", "NO_ASISTIO"):
+        estado = input("  Estado (PROGRAMADA/ATENDIDA/CANCELADA/NO_ASISTIO): ").strip().upper()
+        if estado not in ("PROGRAMADA", "ATENDIDA", "CANCELADA", "NO_ASISTIO"):
+            print("  Opciones válidas: PROGRAMADA, ATENDIDA, CANCELADA, NO_ASISTIO.")
+
+    hora = input("  Hora (HH:MM, default 09:00): ").strip() or "09:00"
 
     try:
         resp = supabase.table("cita").select("idcita").order("idcita", desc=True).execute()
@@ -48,8 +50,8 @@ def registrar_cita():
     cita = {
         "idcita": nuevo_id,
         "idmascota": id_mascota,
-        "codigo_producto_servicio": cod_servicio,
         "estado": estado,
+        "hora": hora,
     }
 
     try:
@@ -75,7 +77,7 @@ def editar_cita():
         return
 
     for c in citas:
-        print(f"  ID: {c['idcita']}  |  Mascota: {c.get('idmascota', '')}  |  Servicio: {c.get('codigo_producto_servicio', '')}  |  Estado: {c.get('estado', '')}")
+        print(f"  ID: {c['idcita']}  |  Mascota: {c.get('idmascota', '')}  |  Hora: {c.get('hora', 'N/A')}  |  Estado: {c.get('estado', '')}")
 
     id_cita = _input_numero("\n  ID de la cita a editar: ")
 
@@ -91,16 +93,16 @@ def editar_cita():
     cita = resp.data[0]
     print(f"\n  Datos actuales:")
     print(f"  Mascota: {cita.get('idmascota', '')}")
-    print(f"  Servicio: {cita.get('codigo_producto_servicio', '')}")
+    print(f"  Hora: {cita.get('hora', 'N/A')}")
     print(f"  Estado: {cita.get('estado', '')}")
 
     print("\n  Deje en blanco para mantener el valor actual:\n")
     print(f"  Estado actual: {cita.get('estado', '')}")
-    print("  Opciones: Programada, En progreso, Finalizada, Cancelada")
-    estado = input("  Nuevo estado: ").strip().capitalize()
+    print("  Opciones: PROGRAMADA, ATENDIDA, CANCELADA, NO_ASISTIO")
+    estado = input("  Nuevo estado: ").strip().upper()
 
     datos = {}
-    if estado and estado in ("Programada", "En progreso", "Finalizada", "Cancelada"):
+    if estado and estado in ("PROGRAMADA", "ATENDIDA", "CANCELADA", "NO_ASISTIO"):
         datos["estado"] = estado
     elif estado:
         print("  Estado inválido, se mantendrá el anterior.")
@@ -132,7 +134,7 @@ def eliminar_cita():
         return
 
     for c in citas:
-        print(f"  ID: {c['idcita']}  |  Mascota: {c.get('idmascota', '')}  |  Servicio: {c.get('codigo_producto_servicio', '')}  |  Estado: {c.get('estado', '')}")
+        print(f"  ID: {c['idcita']}  |  Mascota: {c.get('idmascota', '')}  |  Hora: {c.get('hora', 'N/A')}  |  Estado: {c.get('estado', '')}")
 
     id_cita = _input_numero("\n  ID de la cita a eliminar: ")
 
@@ -149,7 +151,7 @@ def eliminar_cita():
     print(f"\n  Cita a eliminar:")
     print(f"  ID: {cita.get('idcita', '')}")
     print(f"  Mascota: {cita.get('idmascota', '')}")
-    print(f"  Servicio: {cita.get('codigo_producto_servicio', '')}")
+    print(f"  Hora: {cita.get('hora', 'N/A')}")
     print(f"  Estado: {cita.get('estado', '')}")
 
     confirmar = input("\n  ¿Está seguro de eliminar esta cita? (s/n): ").strip().lower()

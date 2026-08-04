@@ -48,7 +48,7 @@ def agregar_receta():
 
     receta = {
         "id_receta": nuevo_id,
-        "indicaciones_en_casa": indicaciones,
+        "indicaciones_casa": indicaciones,
         "id_consulta": id_consulta,
     }
 
@@ -69,7 +69,7 @@ def editar_receta():
             print("  No hay recetas registradas.")
             return
         for r in resp.data:
-            print(f"  ID: {r['id_receta']}  |  Consulta: {r.get('id_consulta', '')}  |  Indicaciones: {r.get('indicaciones_en_casa', '')[:40]}")
+            print(f"  ID: {r['id_receta']}  |  Consulta: {r.get('id_consulta', '')}  |  Indicaciones: {r.get('indicaciones_casa', '')[:40]}")
     except Exception as e:
         print(f"  Error al cargar recetas: {e}")
         return
@@ -86,7 +86,7 @@ def editar_receta():
         return
 
     receta = resp.data[0]
-    print(f"\n  Indicaciones actuales: {receta.get('indicaciones_en_casa', '')}")
+    print(f"\n  Indicaciones actuales: {receta.get('indicaciones_casa', '')}")
 
     nuevas_ind = input("\n  Nuevas indicaciones (deje en blanco para mantener): ").strip()
 
@@ -95,7 +95,7 @@ def editar_receta():
         return
 
     try:
-        supabase.table("receta").update({"indicaciones_en_casa": nuevas_ind}).eq("id_receta", id_receta).execute()
+        supabase.table("receta").update({"indicaciones_casa": nuevas_ind}).eq("id_receta", id_receta).execute()
         print(f"\n  Receta {id_receta} actualizada exitosamente.")
     except Exception as e:
         print(f"\n  Error al actualizar receta: {e}")
@@ -111,7 +111,7 @@ def eliminar_receta():
             print("  No hay recetas registradas.")
             return
         for r in resp.data:
-            print(f"  ID: {r['id_receta']}  |  Consulta: {r.get('id_consulta', '')}  |  Indicaciones: {r.get('indicaciones_en_casa', '')[:40]}")
+            print(f"  ID: {r['id_receta']}  |  Consulta: {r.get('id_consulta', '')}  |  Indicaciones: {r.get('indicaciones_casa', '')[:40]}")
     except Exception as e:
         print(f"  Error al cargar recetas: {e}")
         return
@@ -150,7 +150,7 @@ def agregar_atencion_estetica():
             print(f"\n  No existe mascota con ID {id_mascota}.")
             return
     except Exception as e:
-        print(f"\n  Error al verificar mascota: {e}")
+        print(f"  Error al verificar mascota: {e}")
         return
 
     hora_inicio = _input_no_vacio("  Hora de inicio (HH:MM): ")
@@ -158,15 +158,15 @@ def agregar_atencion_estetica():
     observaciones = input("  Observaciones: ").strip()
 
     try:
-        resp_max = supabase.table("atencion_estetica").select("id_peluqueria").order("id_peluqueria", desc=True).execute()
-        max_id = resp_max.data[0]["id_peluqueria"] if resp_max.data else 0
+        resp_max = supabase.table("atencion_estetica").select("id_atencion_estetica").order("id_atencion_estetica", desc=True).execute()
+        max_id = resp_max.data[0]["id_atencion_estetica"] if resp_max.data else 0
         nuevo_id = max_id + 1
     except Exception as e:
         print(f"\n  Error al obtener ID: {e}")
         return
 
     atencion = {
-        "id_peluqueria": nuevo_id,
+        "id_atencion_estetica": nuevo_id,
         "hora_inicio": hora_inicio,
         "hora_fin": hora_fin,
         "observaciones": observaciones or None,
@@ -189,7 +189,7 @@ def editar_atencion_estetica():
             print("  No hay atenciones estéticas registradas.")
             return
         for a in resp.data:
-            print(f"  ID: {a['id_peluqueria']}  |  Mascota: {a.get('idmascota', '')}  |  Inicio: {a.get('hora_inicio', '')}  |  Fin: {a.get('hora_fin', '')}")
+            print(f"  ID: {a['id_atencion_estetica']}  |  Mascota: {a.get('idmascota', '')}  |  Inicio: {a.get('hora_inicio', '')}  |  Fin: {a.get('hora_fin', '')}")
     except Exception as e:
         print(f"  Error al cargar atenciones: {e}")
         return
@@ -197,7 +197,7 @@ def editar_atencion_estetica():
     id_atencion = _input_numero("  ID de la atención a editar: ")
 
     try:
-        resp = supabase.table("atencion_estetica").select("*").eq("id_peluqueria", id_atencion).execute()
+        resp = supabase.table("atencion_estetica").select("*").eq("id_atencion_estetica", id_atencion).execute()
         if not resp.data:
             print(f"\n  No existe atención con ID {id_atencion}.")
             return
@@ -229,7 +229,7 @@ def editar_atencion_estetica():
         return
 
     try:
-        supabase.table("atencion_estetica").update(datos).eq("id_peluqueria", id_atencion).execute()
+        supabase.table("atencion_estetica").update(datos).eq("id_atencion_estetica", id_atencion).execute()
         print(f"\n  Atención {id_atencion} actualizada exitosamente.")
     except Exception as e:
         print(f"\n  Error al actualizar atención: {e}")
@@ -244,7 +244,7 @@ def eliminar_atencion_estetica():
             print("  No hay atenciones estéticas registradas.")
             return
         for a in resp.data:
-            print(f"  ID: {a['id_peluqueria']}  |  Mascota: {a.get('idmascota', '')}  |  Inicio: {a.get('hora_inicio', '')}")
+            print(f"  ID: {a['id_atencion_estetica']}  |  Mascota: {a.get('idmascota', '')}  |  Inicio: {a.get('hora_inicio', '')}")
     except Exception as e:
         print(f"  Error al cargar atenciones: {e}")
         return
@@ -257,7 +257,7 @@ def eliminar_atencion_estetica():
         return
 
     try:
-        supabase.table("atencion_estetica").delete().eq("id_peluqueria", id_atencion).execute()
+        supabase.table("atencion_estetica").delete().eq("id_atencion_estetica", id_atencion).execute()
         print(f"\n  Atención {id_atencion} eliminada exitosamente.")
     except Exception as e:
         print(f"\n  Error al eliminar atención: {e}")
@@ -268,7 +268,7 @@ def agregar_medicina_detalle():
 
     print("\n  --- Medicinas disponibles ---")
     try:
-        resp = supabase.table("producto_servicio").select("*").eq("tipo", "Medicina").execute()
+        resp = supabase.table("producto_servicio").select("*").like("codigo_producto_servicio", "MED-%").execute()
         if not resp.data:
             print("  No hay medicinas registradas.")
             return
@@ -281,7 +281,7 @@ def agregar_medicina_detalle():
     cod = _input_no_vacio("  Código de la medicina: ")
 
     try:
-        resp = supabase.table("medicina_detalles").select("*").eq("codigo_producto_servicio", cod).execute()
+        resp = supabase.table("medicina").select("*").eq("codigo_producto_servicio", cod).execute()
         if resp.data:
             print(f"\n  Esta medicina ya tiene detalles registrados.")
             return
@@ -300,7 +300,7 @@ def agregar_medicina_detalle():
     }
 
     try:
-        supabase.table("medicina_detalles").insert(detalle).execute()
+        supabase.table("medicina").insert(detalle).execute()
         print(f"\n  Detalle de medicina {cod} registrado exitosamente.")
     except Exception as e:
         print(f"\n  Error al registrar detalle: {e}")
@@ -310,7 +310,7 @@ def editar_medicina_detalle():
     titulo("EDITAR DETALLE DE MEDICINA")
 
     try:
-        resp = supabase.table("medicina_detalles").select("*").execute()
+        resp = supabase.table("medicina").select("*").execute()
         if not resp.data:
             print("  No hay detalles de medicinas registrados.")
             return
@@ -323,7 +323,7 @@ def editar_medicina_detalle():
     cod = _input_no_vacio("  Código de la medicina a editar: ")
 
     try:
-        resp = supabase.table("medicina_detalles").select("*").eq("codigo_producto_servicio", cod).execute()
+        resp = supabase.table("medicina").select("*").eq("codigo_producto_servicio", cod).execute()
         if not resp.data:
             print(f"\n  No existe detalle para medicina {cod}.")
             return
@@ -358,7 +358,7 @@ def editar_medicina_detalle():
         return
 
     try:
-        supabase.table("medicina_detalles").update(datos).eq("codigo_producto_servicio", cod).execute()
+        supabase.table("medicina").update(datos).eq("codigo_producto_servicio", cod).execute()
         print(f"\n  Medicina {cod} actualizada exitosamente.")
     except Exception as e:
         print(f"\n  Error al actualizar medicina: {e}")
@@ -368,7 +368,7 @@ def eliminar_medicina_detalle():
     titulo("ELIMINAR DETALLE DE MEDICINA")
 
     try:
-        resp = supabase.table("medicina_detalles").select("*").execute()
+        resp = supabase.table("medicina").select("*").execute()
         if not resp.data:
             print("  No hay detalles de medicinas registrados.")
             return
@@ -386,7 +386,7 @@ def eliminar_medicina_detalle():
         return
 
     try:
-        supabase.table("medicina_detalles").delete().eq("codigo_producto_servicio", cod).execute()
+        supabase.table("medicina").delete().eq("codigo_producto_servicio", cod).execute()
         print(f"\n  Detalle de medicina {cod} eliminado exitosamente.")
     except Exception as e:
         print(f"\n  Error al eliminar detalle: {e}")
@@ -397,7 +397,7 @@ def agregar_accesorio_detalle():
 
     print("\n  --- Accesorios disponibles ---")
     try:
-        resp = supabase.table("producto_servicio").select("*").eq("tipo", "Accesorio").execute()
+        resp = supabase.table("producto_servicio").select("*").like("codigo_producto_servicio", "ACC-%").execute()
         if not resp.data:
             print("  No hay accesorios registrados.")
             return
@@ -410,7 +410,7 @@ def agregar_accesorio_detalle():
     cod = _input_no_vacio("  Código del accesorio: ")
 
     try:
-        resp = supabase.table("accesorio_detalles").select("*").eq("codigo_producto_servicio", cod).execute()
+        resp = supabase.table("accesorio").select("*").eq("codigo_producto_servicio", cod).execute()
         if resp.data:
             print(f"\n  Este accesorio ya tiene detalles registrados.")
             return
@@ -429,7 +429,7 @@ def agregar_accesorio_detalle():
     }
 
     try:
-        supabase.table("accesorio_detalles").insert(detalle).execute()
+        supabase.table("accesorio").insert(detalle).execute()
         print(f"\n  Detalle de accesorio {cod} registrado exitosamente.")
     except Exception as e:
         print(f"\n  Error al registrar detalle: {e}")
@@ -439,7 +439,7 @@ def editar_accesorio_detalle():
     titulo("EDITAR DETALLE DE ACCESORIO")
 
     try:
-        resp = supabase.table("accesorio_detalles").select("*").execute()
+        resp = supabase.table("accesorio").select("*").execute()
         if not resp.data:
             print("  No hay detalles de accesorios registrados.")
             return
@@ -452,7 +452,7 @@ def editar_accesorio_detalle():
     cod = _input_no_vacio("  Código del accesorio a editar: ")
 
     try:
-        resp = supabase.table("accesorio_detalles").select("*").eq("codigo_producto_servicio", cod).execute()
+        resp = supabase.table("accesorio").select("*").eq("codigo_producto_servicio", cod).execute()
         if not resp.data:
             print(f"\n  No existe detalle para accesorio {cod}.")
             return
@@ -487,7 +487,7 @@ def editar_accesorio_detalle():
         return
 
     try:
-        supabase.table("accesorio_detalles").update(datos).eq("codigo_producto_servicio", cod).execute()
+        supabase.table("accesorio").update(datos).eq("codigo_producto_servicio", cod).execute()
         print(f"\n  Accesorio {cod} actualizado exitosamente.")
     except Exception as e:
         print(f"\n  Error al actualizar accesorio: {e}")
@@ -497,7 +497,7 @@ def eliminar_accesorio_detalle():
     titulo("ELIMINAR DETALLE DE ACCESORIO")
 
     try:
-        resp = supabase.table("accesorio_detalles").select("*").execute()
+        resp = supabase.table("accesorio").select("*").execute()
         if not resp.data:
             print("  No hay detalles de accesorios registrados.")
             return
@@ -515,7 +515,7 @@ def eliminar_accesorio_detalle():
         return
 
     try:
-        supabase.table("accesorio_detalles").delete().eq("codigo_producto_servicio", cod).execute()
+        supabase.table("accesorio").delete().eq("codigo_producto_servicio", cod).execute()
         print(f"\n  Detalle de accesorio {cod} eliminado exitosamente.")
     except Exception as e:
         print(f"\n  Error al eliminar detalle: {e}")
@@ -526,7 +526,7 @@ def agregar_servicio_detalle():
 
     print("\n  --- Servicios disponibles ---")
     try:
-        resp = supabase.table("producto_servicio").select("*").eq("tipo", "Servicio").execute()
+        resp = supabase.table("producto_servicio").select("*").like("codigo_producto_servicio", "SER-%").execute()
         if not resp.data:
             print("  No hay servicios registrados.")
             return
@@ -539,7 +539,7 @@ def agregar_servicio_detalle():
     cod = _input_no_vacio("  Código del servicio: ")
 
     try:
-        resp = supabase.table("servicio_detalles").select("*").eq("codigo_producto_servicio", cod).execute()
+        resp = supabase.table("servicio").select("*").eq("codigo_producto_servicio", cod).execute()
         if resp.data:
             print(f"\n  Este servicio ya tiene detalles registrados.")
             return
@@ -556,7 +556,7 @@ def agregar_servicio_detalle():
     }
 
     try:
-        supabase.table("servicio_detalles").insert(detalle).execute()
+        supabase.table("servicio").insert(detalle).execute()
         print(f"\n  Detalle de servicio {cod} registrado exitosamente.")
     except Exception as e:
         print(f"\n  Error al registrar detalle: {e}")
@@ -566,7 +566,7 @@ def editar_servicio_detalle():
     titulo("EDITAR DETALLE DE SERVICIO")
 
     try:
-        resp = supabase.table("servicio_detalles").select("*").execute()
+        resp = supabase.table("servicio").select("*").execute()
         if not resp.data:
             print("  No hay detalles de servicios registrados.")
             return
@@ -580,7 +580,7 @@ def editar_servicio_detalle():
     cod = _input_no_vacio("  Código del servicio a editar: ")
 
     try:
-        resp = supabase.table("servicio_detalles").select("*").eq("codigo_producto_servicio", cod).execute()
+        resp = supabase.table("servicio").select("*").eq("codigo_producto_servicio", cod).execute()
         if not resp.data:
             print(f"\n  No existe detalle para servicio {cod}.")
             return
@@ -611,7 +611,7 @@ def editar_servicio_detalle():
         return
 
     try:
-        supabase.table("servicio_detalles").update(datos).eq("codigo_producto_servicio", cod).execute()
+        supabase.table("servicio").update(datos).eq("codigo_producto_servicio", cod).execute()
         print(f"\n  Servicio {cod} actualizado exitosamente.")
     except Exception as e:
         print(f"\n  Error al actualizar servicio: {e}")
@@ -621,7 +621,7 @@ def eliminar_servicio_detalle():
     titulo("ELIMINAR DETALLE DE SERVICIO")
 
     try:
-        resp = supabase.table("servicio_detalles").select("*").execute()
+        resp = supabase.table("servicio").select("*").execute()
         if not resp.data:
             print("  No hay detalles de servicios registrados.")
             return
@@ -640,7 +640,7 @@ def eliminar_servicio_detalle():
         return
 
     try:
-        supabase.table("servicio_detalles").delete().eq("codigo_producto_servicio", cod).execute()
+        supabase.table("servicio").delete().eq("codigo_producto_servicio", cod).execute()
         print(f"\n  Detalle de servicio {cod} eliminado exitosamente.")
     except Exception as e:
         print(f"\n  Error al eliminar detalle: {e}")
