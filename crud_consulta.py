@@ -11,7 +11,11 @@ def registrar_consulta():
         return
 
     diagnostico = _input_no_vacio("  Diagnóstico: ")
+    if diagnostico is None:
+        return
     tratamiento = _input_no_vacio("  Tratamiento clínico: ")
+    if tratamiento is None:
+        return
 
     try:
         resp = supabase.table("consulta").select("id_consulta").order("id_consulta", desc=True).execute()
@@ -54,6 +58,8 @@ def editar_consulta():
         print(f"  ID: {c['id_consulta']}  |  Mascota: {c.get('idmascota', '')}  |  Diagnóstico: {c.get('diagnostico', '')[:30]}")
 
     id_consulta = _input_numero("\n  ID de la consulta a editar: ")
+    if id_consulta is None:
+        return
 
     try:
         resp = supabase.table("consulta").select("*").eq("id_consulta", id_consulta).execute()
@@ -71,7 +77,13 @@ def editar_consulta():
 
     print("\n  Deje en blanco para mantener el valor actual:\n")
     diagnostico = input(f"  Diagnóstico [{consulta.get('diagnostico', '')}]: ").strip()
+    if diagnostico.lower() in ("cancelar", "c", "salir"):
+        print("\n  Operacion cancelada.")
+        return
     tratamiento = input(f"  Tratamiento [{consulta.get('tratamiento_clinico', '')}]: ").strip()
+    if tratamiento.lower() in ("cancelar", "c", "salir"):
+        print("\n  Operacion cancelada.")
+        return
 
     datos = {}
     if diagnostico:
@@ -109,6 +121,8 @@ def eliminar_consulta():
         print(f"  ID: {c['id_consulta']}  |  Mascota: {c.get('idmascota', '')}  |  Diagnóstico: {c.get('diagnostico', '')[:30]}")
 
     id_consulta = _input_numero("\n  ID de la consulta a eliminar: ")
+    if id_consulta is None:
+        return
 
     try:
         resp = supabase.table("consulta").select("*").eq("id_consulta", id_consulta).execute()

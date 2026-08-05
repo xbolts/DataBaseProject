@@ -26,6 +26,8 @@ def registrar_cita():
         print(f"  {s['codigo_producto_servicio']}  |  {s['descripcion']}  |  ${s.get('precio', 0)}")
 
     cod_servicio = _input_no_vacio("  Código del servicio: ")
+    if cod_servicio is None:
+        return
 
     if not any(s["codigo_producto_servicio"] == cod_servicio for s in servicios):
         print(f"\n  Error: El servicio {cod_servicio} no existe.")
@@ -33,11 +35,19 @@ def registrar_cita():
 
     estado = ""
     while estado not in ("PROGRAMADA", "ATENDIDA", "CANCELADA", "NO_ASISTIO"):
-        estado = input("  Estado (PROGRAMADA/ATENDIDA/CANCELADA/NO_ASISTIO): ").strip().upper()
+        raw = input("  Estado (PROGRAMADA/ATENDIDA/CANCELADA/NO_ASISTIO): ").strip()
+        if raw.lower() in ("cancelar", "c", "salir"):
+            print("\n  Operacion cancelada.")
+            return
+        estado = raw.upper()
         if estado not in ("PROGRAMADA", "ATENDIDA", "CANCELADA", "NO_ASISTIO"):
             print("  Opciones válidas: PROGRAMADA, ATENDIDA, CANCELADA, NO_ASISTIO.")
 
-    hora = input("  Hora (HH:MM, default 09:00): ").strip() or "09:00"
+    hora = input("  Hora (HH:MM, default 09:00): ").strip()
+    if hora.lower() in ("cancelar", "c", "salir"):
+        print("\n  Operacion cancelada.")
+        return
+    hora = hora or "09:00"
 
     try:
         resp = supabase.table("cita").select("idcita").order("idcita", desc=True).execute()
@@ -80,6 +90,8 @@ def editar_cita():
         print(f"  ID: {c['idcita']}  |  Mascota: {c.get('idmascota', '')}  |  Hora: {c.get('hora', 'N/A')}  |  Estado: {c.get('estado', '')}")
 
     id_cita = _input_numero("\n  ID de la cita a editar: ")
+    if id_cita is None:
+        return
 
     try:
         resp = supabase.table("cita").select("*").eq("idcita", id_cita).execute()
@@ -99,7 +111,11 @@ def editar_cita():
     print("\n  Deje en blanco para mantener el valor actual:\n")
     print(f"  Estado actual: {cita.get('estado', '')}")
     print("  Opciones: PROGRAMADA, ATENDIDA, CANCELADA, NO_ASISTIO")
-    estado = input("  Nuevo estado: ").strip().upper()
+    estado = input("  Nuevo estado: ").strip()
+    if estado.lower() in ("cancelar", "c", "salir"):
+        print("\n  Operacion cancelada.")
+        return
+    estado = estado.upper()
 
     datos = {}
     if estado and estado in ("PROGRAMADA", "ATENDIDA", "CANCELADA", "NO_ASISTIO"):
@@ -137,6 +153,8 @@ def eliminar_cita():
         print(f"  ID: {c['idcita']}  |  Mascota: {c.get('idmascota', '')}  |  Hora: {c.get('hora', 'N/A')}  |  Estado: {c.get('estado', '')}")
 
     id_cita = _input_numero("\n  ID de la cita a eliminar: ")
+    if id_cita is None:
+        return
 
     try:
         resp = supabase.table("cita").select("*").eq("idcita", id_cita).execute()

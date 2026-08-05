@@ -6,10 +6,18 @@ def registrar_producto():
     titulo("REGISTRAR PRODUCTO / SERVICIO")
 
     codigo = _input_no_vacio("  Código (ej: SER-004, MED-004, ACC-005): ")
+    if codigo is None:
+        return
     descripcion = _input_no_vacio("  Descripción: ")
+    if descripcion is None:
+        return
 
     precio = _input_numero("  Precio: ", float)
+    if precio is None:
+        return
     porcentaje_iva = _input_numero("  Porcentaje IVA (%): ", float)
+    if porcentaje_iva is None:
+        return
 
     try:
         existe = supabase.table("producto_servicio").select("*").eq("codigo_producto_servicio", codigo).execute()
@@ -32,8 +40,16 @@ def registrar_producto():
 
         if codigo.upper().startswith("MED-"):
             stock = _input_numero("  Stock disponible: ")
+            if stock is None:
+                return
             cad = input("  Fecha de caducidad (YYYY-MM-DD): ").strip()
+            if cad.lower() in ("cancelar", "c", "salir"):
+                print("\n  Operacion cancelada.")
+                return
             pres = input("  Presentación: ").strip()
+            if pres.lower() in ("cancelar", "c", "salir"):
+                print("\n  Operacion cancelada.")
+                return
             supabase.table("medicina").insert({
                 "codigo_producto_servicio": codigo,
                 "stock_disponible": stock,
@@ -44,8 +60,16 @@ def registrar_producto():
 
         elif codigo.upper().startswith("ACC-"):
             stock = _input_numero("  Stock disponible: ")
+            if stock is None:
+                return
             cat = input("  Categoría: ").strip()
+            if cat.lower() in ("cancelar", "c", "salir"):
+                print("\n  Operacion cancelada.")
+                return
             mar = input("  Marca: ").strip()
+            if mar.lower() in ("cancelar", "c", "salir"):
+                print("\n  Operacion cancelada.")
+                return
             supabase.table("accesorio").insert({
                 "codigo_producto_servicio": codigo,
                 "stock_disponible": stock,
@@ -56,7 +80,13 @@ def registrar_producto():
 
         elif codigo.upper().startswith("SER-"):
             duracion = _input_numero("  Duración estimada (minutos): ")
-            requiere = input("  ¿Requiere cita? (s/n): ").strip().lower() == "s"
+            if duracion is None:
+                return
+            requiere = input("  ¿Requiere cita? (s/n): ").strip()
+            if requiere.lower() in ("cancelar", "c", "salir"):
+                print("\n  Operacion cancelada.")
+                return
+            requiere = requiere.lower() == "s"
             supabase.table("servicio").insert({
                 "codigo_producto_servicio": codigo,
                 "duracion_estimada": duracion,
@@ -72,6 +102,8 @@ def editar_producto():
     titulo("EDITAR PRODUCTO / SERVICIO")
 
     codigo = _input_no_vacio("  Código del producto a editar: ")
+    if codigo is None:
+        return
 
     try:
         resp = supabase.table("producto_servicio").select("*").eq("codigo_producto_servicio", codigo).execute()
@@ -90,8 +122,17 @@ def editar_producto():
 
     print("\n  Deje en blanco para mantener el valor actual:\n")
     descripcion = input(f"  Descripción [{prod.get('descripcion', '')}]: ").strip()
+    if descripcion.lower() in ("cancelar", "c", "salir"):
+        print("\n  Operacion cancelada.")
+        return
     precio = input(f"  Precio [{prod.get('precio', 0)}]: ").strip()
+    if precio.lower() in ("cancelar", "c", "salir"):
+        print("\n  Operacion cancelada.")
+        return
     porcentaje_iva = input(f"  Porcentaje IVA [{prod.get('porcentaje_iva', '')}]: ").strip()
+    if porcentaje_iva.lower() in ("cancelar", "c", "salir"):
+        print("\n  Operacion cancelada.")
+        return
 
     datos = {}
     if descripcion:
@@ -122,6 +163,8 @@ def eliminar_producto():
     titulo("ELIMINAR PRODUCTO / SERVICIO")
 
     codigo = _input_no_vacio("  Código del producto a eliminar: ")
+    if codigo is None:
+        return
 
     try:
         resp = supabase.table("producto_servicio").select("*").eq("codigo_producto_servicio", codigo).execute()

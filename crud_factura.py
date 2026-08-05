@@ -15,6 +15,8 @@ def registrar_factura():
         print(f"  {c['cedula_cliente']}  |  {c.get('nombre', 'N/A')}")
 
     cedula_cliente = _input_no_vacio("  Cédula del cliente: ")
+    if cedula_cliente is None:
+        return
 
     if not any(cl["cedula_cliente"] == cedula_cliente for cl in resp_cli.data):
         print(f"\n  Error: No existe un cliente con cédula {cedula_cliente}.")
@@ -22,13 +24,21 @@ def registrar_factura():
 
     estado_pago = ""
     while estado_pago not in ("PAGADA", "PENDIENTE", "ANULADA"):
-        estado_pago = input("  Estado de pago (PAGADA/PENDIENTE/ANULADA): ").strip().upper()
+        raw = input("  Estado de pago (PAGADA/PENDIENTE/ANULADA): ").strip()
+        if raw.lower() in ("cancelar", "c", "salir"):
+            print("\n  Operacion cancelada.")
+            return
+        estado_pago = raw.upper()
         if estado_pago not in ("PAGADA", "PENDIENTE", "ANULADA"):
             print("  Opciones válidas: PAGADA, PENDIENTE, ANULADA.")
 
     forma_pago = ""
     while forma_pago not in ("EFECTIVO", "TARJETA_CREDITO", "TARJETA_DEBITO", "TRANSFERENCIA"):
-        forma_pago = input("  Forma de pago (EFECTIVO/TARJETA_CREDITO/TARJETA_DEBITO/TRANSFERENCIA): ").strip().upper()
+        raw = input("  Forma de pago (EFECTIVO/TARJETA_CREDITO/TARJETA_DEBITO/TRANSFERENCIA): ").strip()
+        if raw.lower() in ("cancelar", "c", "salir"):
+            print("\n  Operacion cancelada.")
+            return
+        forma_pago = raw.upper()
         if forma_pago not in ("EFECTIVO", "TARJETA_CREDITO", "TARJETA_DEBITO", "TRANSFERENCIA"):
             print("  Opciones válidas: EFECTIVO, TARJETA_CREDITO, TARJETA_DEBITO, TRANSFERENCIA.")
 
@@ -51,6 +61,9 @@ def registrar_factura():
 
     while True:
         cod = input("  Código del producto/servicio (o 'fin'): ").strip()
+        if cod.lower() in ("cancelar", "c", "salir"):
+            print("\n  Operacion cancelada.")
+            return
         if cod.lower() == "fin":
             break
 
@@ -67,6 +80,8 @@ def registrar_factura():
         print(f"    -> {prod['descripcion']} (${prod.get('precio', 0)})")
 
         cantidad = _input_numero("    Cantidad: ")
+        if cantidad is None:
+            return
 
         precio_unitario = float(prod.get("precio", 0))
         subtotal = round(precio_unitario * cantidad, 2)
@@ -129,6 +144,8 @@ def agregar_detalle_factura():
         return
 
     num_comp = _input_no_vacio("  N° de comprobante: ")
+    if num_comp is None:
+        return
 
     try:
         resp = supabase.table("factura").select("*").eq("num_comprobante", num_comp).execute()
@@ -149,6 +166,8 @@ def agregar_detalle_factura():
         return
 
     cod = _input_no_vacio("  Código del producto: ")
+    if cod is None:
+        return
 
     try:
         resp_p = supabase.table("producto_servicio").select("*").eq("codigo_producto_servicio", cod).execute()
@@ -163,6 +182,8 @@ def agregar_detalle_factura():
     print(f"  -> {prod['descripcion']} (${prod.get('precio', 0)})")
 
     cantidad = _input_numero("  Cantidad: ")
+    if cantidad is None:
+        return
     precio_unitario = float(prod.get("precio", 0))
     subtotal = round(precio_unitario * cantidad, 2)
 
@@ -185,6 +206,8 @@ def editar_detalle_factura():
     titulo("EDITAR DETALLE DE FACTURA")
 
     num_comp = _input_no_vacio("  N° de comprobante: ")
+    if num_comp is None:
+        return
 
     try:
         resp = supabase.table("factura_detalle").select("*").eq("num_comprobante", num_comp).execute()
@@ -199,6 +222,8 @@ def editar_detalle_factura():
         return
 
     cod = _input_no_vacio("  Código del producto a editar: ")
+    if cod is None:
+        return
 
     try:
         resp = supabase.table("factura_detalle").select("*").eq("num_comprobante", num_comp).eq("codigo_producto_servicio", cod).execute()
@@ -215,7 +240,13 @@ def editar_detalle_factura():
     print(f"  Precio unitario: ${det.get('precio_unitario', 0)}")
 
     cantidad = input(f"\n  Nueva cantidad [{det.get('cantidad', 0)}]: ").strip()
+    if cantidad.lower() in ("cancelar", "c", "salir"):
+        print("\n  Operacion cancelada.")
+        return
     precio = input(f"  Nuevo precio unitario [{det.get('precio_unitario', 0)}]: ").strip()
+    if precio.lower() in ("cancelar", "c", "salir"):
+        print("\n  Operacion cancelada.")
+        return
 
     datos = {}
     if cantidad:
@@ -249,6 +280,8 @@ def eliminar_detalle_factura():
     titulo("ELIMINAR DETALLE DE FACTURA")
 
     num_comp = _input_no_vacio("  N° de comprobante: ")
+    if num_comp is None:
+        return
 
     try:
         resp = supabase.table("factura_detalle").select("*").eq("num_comprobante", num_comp).execute()
@@ -263,6 +296,8 @@ def eliminar_detalle_factura():
         return
 
     cod = _input_no_vacio("  Código del producto a eliminar: ")
+    if cod is None:
+        return
 
     confirmar = input(f"\n  ¿Eliminar detalle {cod} de factura {num_comp}? (s/n): ").strip().lower()
     if confirmar != "s":

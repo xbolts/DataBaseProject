@@ -18,6 +18,8 @@ def agregar_receta():
         return
 
     id_consulta = _input_numero("  ID de la consulta: ")
+    if id_consulta is None:
+        return
 
     try:
         resp = supabase.table("consulta").select("*").eq("id_consulta", id_consulta).execute()
@@ -37,6 +39,8 @@ def agregar_receta():
         pass
 
     indicaciones = _input_no_vacio("  Indicaciones en casa: ")
+    if indicaciones is None:
+        return
 
     try:
         resp_max = supabase.table("receta").select("id_receta").order("id_receta", desc=True).execute()
@@ -75,6 +79,8 @@ def editar_receta():
         return
 
     id_receta = _input_numero("  ID de la receta a editar: ")
+    if id_receta is None:
+        return
 
     try:
         resp = supabase.table("receta").select("*").eq("id_receta", id_receta).execute()
@@ -89,6 +95,9 @@ def editar_receta():
     print(f"\n  Indicaciones actuales: {receta.get('indicaciones_casa', '')}")
 
     nuevas_ind = input("\n  Nuevas indicaciones (deje en blanco para mantener): ").strip()
+    if nuevas_ind.lower() in ("cancelar", "c", "salir"):
+        print("\n  Operacion cancelada.")
+        return
 
     if not nuevas_ind:
         print("\n  No se realizaron cambios.")
@@ -117,6 +126,8 @@ def eliminar_receta():
         return
 
     id_receta = _input_numero("  ID de la receta a eliminar: ")
+    if id_receta is None:
+        return
 
     confirmar = input(f"\n  ¿Eliminar receta {id_receta}? (s/n): ").strip().lower()
     if confirmar != "s":
@@ -143,6 +154,8 @@ def agregar_atencion_estetica():
         return
 
     id_mascota = _input_numero("  ID de la mascota: ")
+    if id_mascota is None:
+        return
 
     try:
         resp = supabase.table("mascota").select("*").eq("idmascota", id_mascota).execute()
@@ -154,8 +167,15 @@ def agregar_atencion_estetica():
         return
 
     hora_inicio = _input_no_vacio("  Hora de inicio (HH:MM): ")
+    if hora_inicio is None:
+        return
     hora_fin = _input_no_vacio("  Hora de fin (HH:MM): ")
+    if hora_fin is None:
+        return
     observaciones = input("  Observaciones: ").strip()
+    if observaciones.lower() in ("cancelar", "c", "salir"):
+        print("\n  Operacion cancelada.")
+        return
 
     try:
         resp_max = supabase.table("atencion_estetica").select("id_atencion_estetica").order("id_atencion_estetica", desc=True).execute()
@@ -195,6 +215,8 @@ def editar_atencion_estetica():
         return
 
     id_atencion = _input_numero("  ID de la atención a editar: ")
+    if id_atencion is None:
+        return
 
     try:
         resp = supabase.table("atencion_estetica").select("*").eq("id_atencion_estetica", id_atencion).execute()
@@ -213,8 +235,17 @@ def editar_atencion_estetica():
 
     print("\n  Deje en blanco para mantener el valor actual:\n")
     hora_inicio = input(f"  Hora inicio [{atencion.get('hora_inicio', '')}]: ").strip()
+    if hora_inicio.lower() in ("cancelar", "c", "salir"):
+        print("\n  Operacion cancelada.")
+        return
     hora_fin = input(f"  Hora fin [{atencion.get('hora_fin', '')}]: ").strip()
+    if hora_fin.lower() in ("cancelar", "c", "salir"):
+        print("\n  Operacion cancelada.")
+        return
     observaciones = input(f"  Observaciones [{atencion.get('observaciones', '')}]: ").strip()
+    if observaciones.lower() in ("cancelar", "c", "salir"):
+        print("\n  Operacion cancelada.")
+        return
 
     datos = {}
     if hora_inicio:
@@ -250,6 +281,8 @@ def eliminar_atencion_estetica():
         return
 
     id_atencion = _input_numero("  ID de la atención a eliminar: ")
+    if id_atencion is None:
+        return
 
     confirmar = input(f"\n  ¿Eliminar atención {id_atencion}? (s/n): ").strip().lower()
     if confirmar != "s":
@@ -279,6 +312,8 @@ def agregar_medicina_detalle():
         return
 
     cod = _input_no_vacio("  Código de la medicina: ")
+    if cod is None:
+        return
 
     try:
         resp = supabase.table("medicina").select("*").eq("codigo_producto_servicio", cod).execute()
@@ -289,8 +324,16 @@ def agregar_medicina_detalle():
         pass
 
     stock = _input_numero("  Stock disponible: ")
+    if stock is None:
+        return
     caducidad = input("  Fecha de caducidad (YYYY-MM-DD): ").strip()
+    if caducidad.lower() in ("cancelar", "c", "salir"):
+        print("\n  Operacion cancelada.")
+        return
     presentacion = input("  Presentación: ").strip()
+    if presentacion.lower() in ("cancelar", "c", "salir"):
+        print("\n  Operacion cancelada.")
+        return
 
     detalle = {
         "codigo_producto_servicio": cod,
@@ -321,6 +364,8 @@ def editar_medicina_detalle():
         return
 
     cod = _input_no_vacio("  Código de la medicina a editar: ")
+    if cod is None:
+        return
 
     try:
         resp = supabase.table("medicina").select("*").eq("codigo_producto_servicio", cod).execute()
@@ -339,8 +384,17 @@ def editar_medicina_detalle():
 
     print("\n  Deje en blanco para mantener el valor actual:\n")
     stock = input(f"  Stock [{det.get('stock_disponible', 0)}]: ").strip()
+    if stock.lower() in ("cancelar", "c", "salir"):
+        print("\n  Operacion cancelada.")
+        return
     caducidad = input(f"  Caducidad [{det.get('fecha_caducidad', '')}]: ").strip()
+    if caducidad.lower() in ("cancelar", "c", "salir"):
+        print("\n  Operacion cancelada.")
+        return
     presentacion = input(f"  Presentación [{det.get('presentacion', '')}]: ").strip()
+    if presentacion.lower() in ("cancelar", "c", "salir"):
+        print("\n  Operacion cancelada.")
+        return
 
     datos = {}
     if stock:
@@ -379,6 +433,8 @@ def eliminar_medicina_detalle():
         return
 
     cod = _input_no_vacio("  Código de la medicina a eliminar: ")
+    if cod is None:
+        return
 
     confirmar = input(f"\n  ¿Eliminar detalle de medicina {cod}? (s/n): ").strip().lower()
     if confirmar != "s":
@@ -408,6 +464,8 @@ def agregar_accesorio_detalle():
         return
 
     cod = _input_no_vacio("  Código del accesorio: ")
+    if cod is None:
+        return
 
     try:
         resp = supabase.table("accesorio").select("*").eq("codigo_producto_servicio", cod).execute()
@@ -418,8 +476,16 @@ def agregar_accesorio_detalle():
         pass
 
     stock = _input_numero("  Stock disponible: ")
+    if stock is None:
+        return
     categoria = input("  Categoría: ").strip()
+    if categoria.lower() in ("cancelar", "c", "salir"):
+        print("\n  Operacion cancelada.")
+        return
     marca = input("  Marca: ").strip()
+    if marca.lower() in ("cancelar", "c", "salir"):
+        print("\n  Operacion cancelada.")
+        return
 
     detalle = {
         "codigo_producto_servicio": cod,
@@ -450,6 +516,8 @@ def editar_accesorio_detalle():
         return
 
     cod = _input_no_vacio("  Código del accesorio a editar: ")
+    if cod is None:
+        return
 
     try:
         resp = supabase.table("accesorio").select("*").eq("codigo_producto_servicio", cod).execute()
@@ -468,8 +536,17 @@ def editar_accesorio_detalle():
 
     print("\n  Deje en blanco para mantener el valor actual:\n")
     stock = input(f"  Stock [{det.get('stock_disponible', 0)}]: ").strip()
+    if stock.lower() in ("cancelar", "c", "salir"):
+        print("\n  Operacion cancelada.")
+        return
     categoria = input(f"  Categoría [{det.get('categoria', '')}]: ").strip()
+    if categoria.lower() in ("cancelar", "c", "salir"):
+        print("\n  Operacion cancelada.")
+        return
     marca = input(f"  Marca [{det.get('marca', '')}]: ").strip()
+    if marca.lower() in ("cancelar", "c", "salir"):
+        print("\n  Operacion cancelada.")
+        return
 
     datos = {}
     if stock:
@@ -508,6 +585,8 @@ def eliminar_accesorio_detalle():
         return
 
     cod = _input_no_vacio("  Código del accesorio a eliminar: ")
+    if cod is None:
+        return
 
     confirmar = input(f"\n  ¿Eliminar detalle de accesorio {cod}? (s/n): ").strip().lower()
     if confirmar != "s":
@@ -537,6 +616,8 @@ def agregar_servicio_detalle():
         return
 
     cod = _input_no_vacio("  Código del servicio: ")
+    if cod is None:
+        return
 
     try:
         resp = supabase.table("servicio").select("*").eq("codigo_producto_servicio", cod).execute()
@@ -547,7 +628,13 @@ def agregar_servicio_detalle():
         pass
 
     duracion = _input_numero("  Duración estimada (minutos): ")
-    requiere = input("  ¿Requiere cita? (s/n): ").strip().lower() == "s"
+    if duracion is None:
+        return
+    requiere = input("  ¿Requiere cita? (s/n): ").strip()
+    if requiere.lower() in ("cancelar", "c", "salir"):
+        print("\n  Operacion cancelada.")
+        return
+    requiere = requiere.lower() == "s"
 
     detalle = {
         "codigo_producto_servicio": cod,
@@ -578,6 +665,8 @@ def editar_servicio_detalle():
         return
 
     cod = _input_no_vacio("  Código del servicio a editar: ")
+    if cod is None:
+        return
 
     try:
         resp = supabase.table("servicio").select("*").eq("codigo_producto_servicio", cod).execute()
@@ -595,7 +684,14 @@ def editar_servicio_detalle():
     print(f"  Requiere cita: {req_actual}")
 
     duracion = input(f"\n  Nueva duración [{det.get('duracion_estimada', 0)}]: ").strip()
-    requiere = input(f"  Requiere cita (s/n) [{req_actual}]: ").strip().lower()
+    if duracion.lower() in ("cancelar", "c", "salir"):
+        print("\n  Operacion cancelada.")
+        return
+    requiere = input(f"  Requiere cita (s/n) [{req_actual}]: ").strip()
+    if requiere.lower() in ("cancelar", "c", "salir"):
+        print("\n  Operacion cancelada.")
+        return
+    requiere = requiere.lower()
 
     datos = {}
     if duracion:
@@ -633,6 +729,8 @@ def eliminar_servicio_detalle():
         return
 
     cod = _input_no_vacio("  Código del servicio a eliminar: ")
+    if cod is None:
+        return
 
     confirmar = input(f"\n  ¿Eliminar detalle de servicio {cod}? (s/n): ").strip().lower()
     if confirmar != "s":
