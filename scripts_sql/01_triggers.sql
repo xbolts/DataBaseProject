@@ -56,3 +56,39 @@ CREATE TRIGGER trg_restar_stock_consulta
 AFTER INSERT ON consulta_producto
 FOR EACH ROW
 EXECUTE FUNCTION actualizar_stock_salida();
+
+
+
+
+
+-- ==============================================================================
+-- TRIGGER 2: SUMAR STOCK AL INGRESAR UNA COMPRA DE INSUMOS
+-- ==============================================================================
+
+-- PARTE 1: La función lógica
+CREATE OR REPLACE FUNCTION actualizar_stock_entrada()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- 1. Verificar si el código ingresado existe en la tabla hija MEDICINA
+    IF EXISTS (SELECT 1 FROM medicina WHERE codigo_producto_servicio = NEW.codigo_producto_servicio) THEN
+        UPDATE medicina
+        SET stock_disponible = stock_disponible + NEW.cantidad_recibida
+        WHERE codigo_producto_servicio = NEW.codigo_producto_servicio;
+        
+    -- 2. Si no es medicina, verificar si existe en la tabla hija ACCESORIO
+    ELSIF EXISTS (SELECT 1 FROM accesorio WHERE codigo_producto_servicio = NEW.codigo_producto_servicio) THEN
+        UPDATE accesorio
+        SET stock_disponible = stock_disponible + NEW.cantidad_recibida
+        WHERE codigo_producto_servicio = NEW.codigo_producto_servicio;
+    END IF;
+
+    -- En PostgreSQL, los triggers AFTER deben retornar la variable NEW
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- PARTE 2: El disparador asociado a la tabla
+CREATE TRIGGER trg_sumar_stock_compra
+AFTER INSERT ON compra_insumo
+FOR EACH ROW
+EXECUTE FUNCTION actualizar_stock_entrada();
