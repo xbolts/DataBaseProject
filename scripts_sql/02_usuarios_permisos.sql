@@ -36,3 +36,24 @@ GRANT SELECT, INSERT ON compra_insumo TO gestor_inventario;
 -- 5. USUARIO: veterinario_jefe (Falta 1 permiso de Vista para después)
 -- Permiso 7: Registrar y actualizar las consultas clínicas
 GRANT SELECT, INSERT, UPDATE ON consulta TO veterinario_jefe;
+
+
+-- ==============================================================================
+-- ASIGNACIÓN DE PERMISOS A VISTAS (Views)
+-- ==============================================================================
+
+-- Permiso a la vista de facturación detallada para auditorías
+GRANT SELECT ON vw_facturacion_detallada TO auditor_sri;
+
+-- Permiso a la vista del historial médico completo
+GRANT SELECT ON vw_historial_clinico TO veterinario_jefe;
+
+
+-- ==============================================================================
+-- ASIGNACIÓN DE PERMISOS A PROCEDIMIENTOS ALMACENADOS (SPs)
+-- ==============================================================================
+
+-- Permisos para que la aplicación Python pueda ejecutar el CRUD de mascotas
+GRANT EXECUTE ON PROCEDURE sp_mascota_insertar TO app_veterinaria;
+GRANT EXECUTE ON PROCEDURE sp_mascota_actualizar TO app_veterinaria;
+GRANT EXECUTE ON PROCEDURE sp_mascota_eliminar TO app_veterinaria;
