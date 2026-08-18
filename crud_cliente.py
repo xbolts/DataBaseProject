@@ -21,23 +21,13 @@ def registrar_cliente():
         return
 
     try:
-        existe = supabase.table("cliente").select("*").eq("cedula_cliente", cedula_cliente).execute()
-        if existe.data:
-            print(f"\n  Error: Ya existe un cliente con cedula {cedula_cliente}.")
-            return
-    except Exception:
-        pass
-
-    cliente = {
-        "cedula_cliente": cedula_cliente,
-        "nombre": nombre,
-        "direccion": direccion or None,
-        "telefono": telefono or None,
-        "correo": correo or None,
-    }
-
-    try:
-        supabase.table("cliente").insert(cliente).execute()
+        supabase.rpc("sp_cliente_insertar", {
+            "p_cedula": cedula_cliente,
+            "p_nombre": nombre,
+            "p_direccion": direccion or None,
+            "p_telefono": telefono or None,
+            "p_correo": correo or None,
+        }).execute()
         print(f"\n  Cliente '{nombre}' registrado exitosamente.")
     except Exception as e:
         print(f"\n  Error al registrar cliente: {e}")
@@ -56,7 +46,7 @@ def editar_cliente():
             print(f"\n  No existe un cliente con cedula {cedula_cliente}.")
             return
     except Exception as e:
-        print(f"\n  Error al buscar cliente: {e}")
+        print(f"  Error al buscar cliente: {e}")
         return
 
     cliente = resp.data[0]
@@ -84,22 +74,14 @@ def editar_cliente():
         print("\n  Operacion cancelada.")
         return
 
-    datos = {}
-    if nombre:
-        datos["nombre"] = nombre
-    if direccion:
-        datos["direccion"] = direccion
-    if telefono:
-        datos["telefono"] = telefono
-    if correo:
-        datos["correo"] = correo
-
-    if not datos:
-        print("\n  No se realizaron cambios.")
-        return
-
     try:
-        supabase.table("cliente").update(datos).eq("cedula_cliente", cedula_cliente).execute()
+        supabase.rpc("sp_cliente_actualizar", {
+            "p_cedula": cedula_cliente,
+            "p_nombre": nombre or None,
+            "p_direccion": direccion or None,
+            "p_telefono": telefono or None,
+            "p_correo": correo or None,
+        }).execute()
         print(f"\n  Cliente {cedula_cliente} actualizado exitosamente.")
     except Exception as e:
         print(f"\n  Error al actualizar cliente: {e}")
@@ -118,7 +100,7 @@ def eliminar_cliente():
             print(f"\n  No existe un cliente con cedula {cedula_cliente}.")
             return
     except Exception as e:
-        print(f"\n  Error al buscar cliente: {e}")
+        print(f"  Error al buscar cliente: {e}")
         return
 
     cliente = resp.data[0]
@@ -133,7 +115,7 @@ def eliminar_cliente():
         return
 
     try:
-        supabase.table("cliente").delete().eq("cedula_cliente", cedula_cliente).execute()
+        supabase.rpc("sp_cliente_eliminar", {"p_cedula": cedula_cliente}).execute()
         print(f"\n  Cliente {cedula_cliente} eliminado exitosamente.")
     except Exception as e:
         print(f"\n  Error al eliminar cliente: {e}")

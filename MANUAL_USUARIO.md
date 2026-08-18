@@ -105,3 +105,29 @@ En cualquier momento escriba `cancelar`, `c` o `salir`.
 | "Ya existe un registro" | Usar otro identificador |
 | "No existe..." | Crear el registro primero |
 | "Ingrese un numero valido" | Solo numeros en campos numericos |
+
+---
+
+## Stored Procedures
+
+Las operaciones de cliente y mascota (insertar, actualizar, eliminar) utilizan stored procedures en la base de datos para garantizar integridad referencial y validaciones.
+
+| Procedimiento | Parametros | Descripcion |
+|---------------|------------|-------------|
+| `sp_cliente_insertar` | cedula, nombre, direccion, telefono, correo | Crea un nuevo cliente |
+| `sp_cliente_actualizar` | cedula, nombre, direccion, telefono, correo | Actualiza datos del cliente |
+| `sp_cliente_eliminar` | cedula | Elimina cliente (valida que no tenga facturas) |
+| `sp_mascota_insertar` | nombre, sexo, fecha_nacimiento, especie, raza, cedula_cliente | Crea una mascota |
+| `sp_mascota_actualizar` | id, nombre, sexo, especie, raza | Actualiza datos de mascota |
+| `sp_mascota_eliminar` | id | Elimina mascota (valida que no tenga consultas) |
+
+---
+
+## Vistas Disponibles
+
+| Vista | Descripcion |
+|-------|-------------|
+| `vw_agenda_atenciones` | Agenda de atenciones esteticas con datos del dueno |
+| `vw_historial_clinico` | Historial clinico completo con datos del cliente |
+| `vw_facturacion_detallada` | Facturacion con productos y datos del cliente |
+| `vw_inventario_alertas` | Inventario con estado de stock (CRITICO/BAJO/OK) |

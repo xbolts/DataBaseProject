@@ -22,6 +22,7 @@ def registrar_mascota():
     fecha_nacimiento = _input_no_vacio("  Fecha de nacimiento (YYYY-MM-DD): ")
     if fecha_nacimiento is None:
         return
+
     especie = _input_no_vacio("  Especie (Perro, Gato, etc.): ")
     if especie is None:
         return
@@ -42,34 +43,15 @@ def registrar_mascota():
         return
 
     try:
-        existe = supabase.table("cliente").select("*").eq("cedula_cliente", cedula_cliente).execute()
-        if not existe.data:
-            print(f"\n  Error: No existe un cliente con cédula {cedula_cliente}.")
-            return
-    except Exception:
-        pass
-
-    try:
-        resp = supabase.table("mascota").select("idmascota").order("idmascota", desc=True).execute()
-        max_id = resp.data[0]["idmascota"] if resp.data else 0
-        nuevo_id = max_id + 1
-    except Exception as e:
-        print(f"\n  Error al obtener ID: {e}")
-        return
-
-    mascota = {
-        "idmascota": nuevo_id,
-        "nombre": nombre,
-        "sexo": sexo,
-        "fecha_nacimiento": fecha_nacimiento,
-        "especie": especie,
-        "raza": raza,
-        "cedula_cliente": cedula_cliente,
-    }
-
-    try:
-        supabase.table("mascota").insert(mascota).execute()
-        print(f"\n  Mascota '{nombre}' ({especie} - {raza}) registrada con ID {nuevo_id} (Dueño: {cedula_cliente}).")
+        supabase.rpc("sp_mascota_insertar", {
+            "p_nombre": nombre,
+            "p_sexo": sexo,
+            "p_fecha_nacimiento": fecha_nacimiento,
+            "p_especie": especie,
+            "p_raza": raza,
+            "p_cedula_cliente": cedula_cliente,
+        }).execute()
+        print(f"\n  Mascota '{nombre}' ({especie} - {raza}) registrada (Dueño: {cedula_cliente}).")
     except Exception as e:
         print(f"\n  Error al registrar mascota: {e}")
 
@@ -88,14 +70,13 @@ def editar_mascota():
             print(f"\n  No existe una mascota con ID {id_mascota}.")
             return
     except Exception as e:
-        print(f"\n  Error al buscar mascota: {e}")
+        print(f"  Error al buscar mascota: {e}")
         return
 
     mascota = resp.data[0]
     print(f"\n  Datos actuales:")
     print(f"  Nombre: {mascota.get('nombre', '')}")
     print(f"  Sexo: {mascota.get('sexo', '')}")
-    print(f"  Fecha nacimiento: {mascota.get('fecha_nacimiento', '')}")
     print(f"  Especie: {mascota.get('especie', '')}")
     print(f"  Raza: {mascota.get('raza', '')}")
 
@@ -109,10 +90,6 @@ def editar_mascota():
         print("\n  Operacion cancelada.")
         return
     sexo = sexo.upper()
-    fecha_nacimiento = input(f"  Fecha nacimiento [{mascota.get('fecha_nacimiento', '')}]: ").strip()
-    if fecha_nacimiento.lower() in ("cancelar", "c", "salir"):
-        print("\n  Operacion cancelada.")
-        return
     especie = input(f"  Especie [{mascota.get('especie', '')}]: ").strip()
     if especie.lower() in ("cancelar", "c", "salir"):
         print("\n  Operacion cancelada.")
@@ -122,24 +99,14 @@ def editar_mascota():
         print("\n  Operacion cancelada.")
         return
 
-    datos = {}
-    if nombre:
-        datos["nombre"] = nombre
-    if sexo and sexo in ("M", "H"):
-        datos["sexo"] = sexo
-    if fecha_nacimiento:
-        datos["fecha_nacimiento"] = fecha_nacimiento
-    if especie:
-        datos["especie"] = especie
-    if raza:
-        datos["raza"] = raza
-
-    if not datos:
-        print("\n  No se realizaron cambios.")
-        return
-
     try:
-        supabase.table("mascota").update(datos).eq("idmascota", id_mascota).execute()
+        supabase.rpc("sp_mascota_actualizar", {
+            "p_id": id_mascota,
+            "p_nombre": nombre or None,
+            "p_sexo": sexo or None,
+            "p_especie": especie or None,
+            "p_raza": raza or None,
+        }).execute()
         print(f"\n  Mascota {id_mascota} actualizada exitosamente.")
     except Exception as e:
         print(f"\n  Error al actualizar mascota: {e}")
@@ -159,7 +126,7 @@ def eliminar_mascota():
             print(f"\n  No existe una mascota con ID {id_mascota}.")
             return
     except Exception as e:
-        print(f"\n  Error al buscar mascota: {e}")
+        print(f"  Error al buscar mascota: {e}")
         return
 
     mascota = resp.data[0]
@@ -175,7 +142,7 @@ def eliminar_mascota():
         return
 
     try:
-        supabase.table("mascota").delete().eq("idmascota", id_mascota).execute()
+        supabase.rpc("sp_mascota_eliminar", {"p_id": id_mascota}).execute()
         print(f"\n  Mascota {id_mascota} eliminada exitosamente.")
     except Exception as e:
         print(f"\n  Error al eliminar mascota: {e}")
